@@ -25,6 +25,9 @@ jobs:
 
       - name: Terraform init + apply (local state)
         env:
+          TF_IN_AUTOMATION: "1"
+          TF_LOG: "INFO"            
+          TF_LOG_PATH: "tf.log"
           TF_VAR_region:           ${{ secrets.OCI_REGION }}
           TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
           TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
@@ -33,6 +36,11 @@ jobs:
           TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
           # TF_VAR_private_key_password: ${{ secrets.OCI_PRIVATE_KEY_PASSWORD }}
         run: |
-          terraform init
-          terraform plan
-          terraform apply -auto-approve
+          set -euxo pipefail
+          terraform -version
+          terraform init -input=false
+          terraform validate
+          terraform plan -input=false -out=tfplan
+          terraform apply -input=false -auto-approve tfplan
+          echo "----- TF LOG TAIL -----"
+          tail -n 200 tf.log || true
