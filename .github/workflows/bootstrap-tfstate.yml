@@ -17,11 +17,11 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Write OCI API key
-        run: |
-          mkdir -p ~/.oci
-          echo "${{ secrets.OCI_PRIVATE_KEY_PEM }}" > ~/.oci/oci_api_key.pem
-          chmod 600 ~/.oci/oci_api_key.pem
+      # - name: Write OCI API key
+      #   run: |
+      #     mkdir -p ~/.oci
+      #     echo "${{ secrets.OCI_PRIVATE_KEY_PEM }}" > ~/.oci/oci_api_key.pem
+      #     chmod 600 ~/.oci/oci_api_key.pem
 
       - name: Terraform init + apply (local state)
         env:
