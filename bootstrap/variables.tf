@@ -5,6 +5,10 @@ variable "user_ocid" {}
 variable "fingerprint" {}
 variable "private_key_path" {}
 
+variable "tfstate_bucket_name" {
+  default = "tfstate-bucket"
+}
+
 
 #move terraform .tfstate to OCI
 # export AWS_ACCESS_KEY_ID="<tenancy_namespace>/<username>"   # np. myns/jan.kowalski@firma.pl
