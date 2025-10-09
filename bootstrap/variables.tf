@@ -3,7 +3,8 @@ variable "tenancy_ocid" {}
 variable "compartment_ocid" {}
 variable "user_ocid" {}
 variable "fingerprint" {}
-variable "private_key_path" {}
+variable "private_key_path" { sensitive = true }
+variable "private_key_pem" { sensitive = true }
 
 variable "tfstate_bucket_name" {
   default = "tfstate-bucket"
