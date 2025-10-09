@@ -67,6 +67,7 @@ jobs:
           TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
           TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
+          TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
           set -euxo pipefail
           terraform -version

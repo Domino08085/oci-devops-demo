@@ -11,6 +11,11 @@ variable "tfstate_bucket_name" {
   default = "tfstate-bucket"
 }
 
+variable "namespace" {
+  description = "Object Storage / OCIR namespace for this tenancy"
+  type        = string
+}
+
 
 #move terraform .tfstate to OCI
 # export AWS_ACCESS_KEY_ID="<tenancy_namespace>/<username>"   # np. myns/jan.kowalski@firma.pl
