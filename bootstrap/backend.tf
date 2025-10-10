@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
     bucket                      = "tfstate-bucket"    
     key                         = "bootstrap/terraform.tfstate"
-    region                      = "us-east-1"
+    region                      = "eu-frankfurt-1"
 
     endpoints = {
       s3 = "https://objectstorage.eu-frankfurt-1.oraclecloud.com"
