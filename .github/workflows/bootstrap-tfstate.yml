@@ -18,14 +18,14 @@ jobs:
         with:
           terraform_version: 1.13.3
 
-      # - name: Install OCI CLI
-      #   run: |
-      #     python3 -m pip install --upgrade pip
-      #     pip install oci-cli
-      #     echo "$HOME/.local/bin" >> $GITHUB_PATH
-      # - name: Check OCI CLI
-      #   run: |
-      #     oci --version
+      - name: Install OCI CLI
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install oci-cli
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Check OCI CLI
+        run: |
+          oci --version
 
       - name: Write OCI API private key (PEM)
         run: |
@@ -50,17 +50,6 @@ jobs:
       # - name: IAM sanity check
       #   run: oci iam user get --user-id "${{ secrets.OCI_USER_OCID }}"
 
-      # - name: Object Storage namespace check
-      #   run: oci os ns get --region "${{ secrets.OCI_REGION }}"
-
-      # - name: Dry-run bucket create
-      #   run: |
-      #     oci os bucket create \
-      #       --name gha-tmp-bucket-$RANDOM \
-      #       --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
-      #       --region "${{ secrets.OCI_REGION }}" \
-      #       --public-access-type NoPublicAccess \
-
 
       - name: Sanity check OCI config & key
         run: |
@@ -74,24 +63,36 @@ jobs:
           openssl pkcs8 -in ~/.oci/oci_api_key.pem -inform PEM -nocrypt -outform DER \
             | openssl md5 -c
 
-      - name: Terraform init + apply (local state)
-        env:
-          TF_IN_AUTOMATION: "1"
-          TF_LOG: "INFO"            
-          TF_LOG_PATH: "tf.log"
-          TF_VAR_region:           ${{ secrets.OCI_REGION }}
-          TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
-          TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
-          TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
-          TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+      - name: Object Storage namespace check
+        run: oci os ns get --region "${{ secrets.OCI_REGION }}"
+
+      - name: Dry-run bucket create
         run: |
-          set -euxo pipefail
-          terraform -version
-          terraform init -input=false
-          terraform validate
-          terraform plan -input=false -out=tfplan
-          terraform apply -input=false -auto-approve tfplan
-          echo "----- TF LOG TAIL -----"
-          tail -n 200 tf.log || true
+          oci os bucket create \
+            --name tfstate-bucket \
+            --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
+            --region "${{ secrets.OCI_REGION }}" \
+            --public-access-type NoPublicAccess \
+            --storage-tier standard \
+
+      # - name: Terraform init + apply (local state)
+      #   env:
+      #     TF_IN_AUTOMATION: "1"
+      #     TF_LOG: "INFO"            
+      #     TF_LOG_PATH: "tf.log"
+      #     TF_VAR_region:           ${{ secrets.OCI_REGION }}
+      #     TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
+      #     TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+      #     TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
+      #     TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
+      #     TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
+      #     TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+      #   run: |
+      #     set -euxo pipefail
+      #     terraform -version
+      #     terraform init -input=false
+      #     terraform validate
+      #     terraform plan -input=false -out=tfplan
+      #     terraform apply -input=false -auto-approve tfplan
+      #     echo "----- TF LOG TAIL -----"
+      #     tail -n 200 tf.log || true
