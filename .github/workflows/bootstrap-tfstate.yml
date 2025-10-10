@@ -50,8 +50,8 @@ jobs:
       # - name: IAM sanity check
       #   run: oci iam user get --user-id "${{ secrets.OCI_USER_OCID }}"
 
-      - name: Object Storage namespace check
-        run: oci os ns get --region "${{ secrets.OCI_REGION }}"
+      # - name: Object Storage namespace check
+      #   run: oci os ns get --region "${{ secrets.OCI_REGION }}"
 
       # - name: Dry-run bucket create
       #   run: |
