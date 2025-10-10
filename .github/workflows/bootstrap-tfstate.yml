@@ -18,14 +18,14 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Install OCI CLI
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install oci-cli
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Check OCI CLI
-        run: |
-          oci --version
+      # - name: Install OCI CLI
+      #   run: |
+      #     python3 -m pip install --upgrade pip
+      #     pip install oci-cli
+      #     echo "$HOME/.local/bin" >> $GITHUB_PATH
+      # - name: Check OCI CLI
+      #   run: |
+      #     oci --version
 
       - name: Write OCI API private key (PEM)
         run: |
@@ -88,7 +88,7 @@ jobs:
           TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
           AWS_ACCESS_KEY_ID:     ${{ secrets.OCI_USERNAME }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.OCI_AUTH_TOKEN }}
-          AWS_DEFAULT_REGION:    "eu-frankfurt-1"
+          AWS_DEFAULT_REGION:    us-east-1
         run: |
           set -euxo pipefail
           terraform -version
