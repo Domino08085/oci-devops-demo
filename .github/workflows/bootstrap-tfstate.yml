@@ -44,6 +44,15 @@ jobs:
           key_file=~/.oci/oci_api_key.pem
           EOF
           chmod 600 ~/.oci/config
+
+      - name: Install OCI CLI
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install oci-cli
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Check OCI CLI
+        run: |
+          oci --version
       
       - name: Who am I? (IAM check)
         run: oci iam user get --user-id "${{ secrets.OCI_USER_OCID }}"
