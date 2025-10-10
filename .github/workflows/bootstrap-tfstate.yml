@@ -60,7 +60,6 @@ jobs:
             --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
             --region "${{ secrets.OCI_REGION }}" \
             --public-access-type NoPublicAccess \
-            --dry-run
 
 
       - name: Sanity check OCI config & key
