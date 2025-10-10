@@ -1,17 +1,8 @@
 terraform {
-  backend "s3" {
-    bucket                      = "tfstate-bucket"    
-    key                         = "bootstrap/terraform.tfstate"
-    region                      = "eu-frankfurt-1"
-
-    endpoints = {
-      s3 = "https://objectstorage.eu-frankfurt-1.oraclecloud.com"
-    }
-
-    skip_credentials_validation = true
-    skip_requesting_account_id  = true
-    skip_region_validation      = true
-    use_path_style            = true
-    workspace_key_prefix = ""
+  backend "oci" {
+    bucket         = "tfstate-bucket"
+    namespace      = "frxdvqsyd4jy"
+    compartment_id = "ocid1.compartment.oc1..aaaaaaaahjpyn7ffagxkqpybbrckq7ysmyir65mmybxk7zkpkb6cevjuwm4q"
+    region         = "eu-frankfurt-1"
   }
 }
