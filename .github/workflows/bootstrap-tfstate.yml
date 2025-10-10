@@ -44,6 +44,21 @@ jobs:
           key_file=~/.oci/oci_api_key.pem
           EOF
           chmod 600 ~/.oci/config
+      
+      - name: Who am I? (IAM check)
+        run: oci iam user get --user-id "${{ secrets.OCI_USER_OCID }}"
+
+      - name: Object Storage namespace (auth+region)
+        run: oci os ns get --region "${{ secrets.OCI_REGION }}"
+
+      - name: (Dry-run) create bucket with CLI
+        run: |
+          oci os bucket create \
+            --name gha-tmp-bucket-$RANDOM \
+            --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
+            --region "${{ secrets.OCI_REGION }}" \
+            --public-access-type NoPublicAccess \
+            --dry-run
 
       - name: Sanity check OCI config & key
         run: |
