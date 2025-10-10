@@ -47,19 +47,19 @@ jobs:
           EOF
           chmod 600 ~/.oci/config
 
-      - name: IAM sanity check
-        run: oci iam user get --user-id "${{ secrets.OCI_USER_OCID }}"
+      # - name: IAM sanity check
+      #   run: oci iam user get --user-id "${{ secrets.OCI_USER_OCID }}"
 
       - name: Object Storage namespace check
         run: oci os ns get --region "${{ secrets.OCI_REGION }}"
 
-      - name: Dry-run bucket create
-        run: |
-          oci os bucket create \
-            --name gha-tmp-bucket-$RANDOM \
-            --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
-            --region "${{ secrets.OCI_REGION }}" \
-            --public-access-type NoPublicAccess \
+      # - name: Dry-run bucket create
+      #   run: |
+      #     oci os bucket create \
+      #       --name gha-tmp-bucket-$RANDOM \
+      #       --compartment-id "${{ secrets.OCI_COMPARTMENT_OCID }}" \
+      #       --region "${{ secrets.OCI_REGION }}" \
+      #       --public-access-type NoPublicAccess \
 
 
       - name: Sanity check OCI config & key
@@ -86,6 +86,9 @@ jobs:
           TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
           TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+          AWS_ACCESS_KEY_ID:     ${{ secrets.OCI_USERNAME }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.OCI_AUTH_TOKEN }}
+          AWS_DEFAULT_REGION:    ${{ secrets.OCI_REGION }}
         run: |
           set -euxo pipefail
           terraform -version
