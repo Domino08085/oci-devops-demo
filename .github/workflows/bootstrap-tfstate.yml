@@ -61,13 +61,13 @@ jobs:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            
           TF_LOG_PATH: "tf.log"
-          # TF_VAR_region:           ${{ secrets.OCI_REGION }}
-          # TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
-          # TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          # TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
-          # TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
-          # TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
-          # TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+          TF_VAR_region:           ${{ secrets.OCI_REGION }}
+          TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
+          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+          TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
+          TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
+          TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
+          TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
           set -euxo pipefail
           terraform -version
