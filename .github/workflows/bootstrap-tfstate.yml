@@ -99,12 +99,14 @@ jobs:
         #   echo "----- TF LOG TAIL -----"
         #   tail -n 200 tf.log || true
         run: |
-          terraform init -reconfigure -input=false \
+          terraform -chdir=bootstrap init -reconfigure -input=false \
             -backend-config="bucket=tfstate-bucket" \
             -backend-config="key=bootstrap/terraform.tfstate" \
             -backend-config="region=us-east-1" \
-            -backend-config="endpoints.s3=https://${OCIR_NAMESPACE}.compat.objectstorage.eu-frankfurt-1.oraclecloud.com" \
+            -backend-config="endpoints.s3=https://${{ secrets.OCIR_NAMESPACE }}.compat.objectstorage.eu-frankfurt-1.oraclecloud.com" \
             -backend-config="use_path_style=false" \
             -backend-config="skip_credentials_validation=true" \
             -backend-config="skip_region_validation=true" \
             -backend-config="skip_requesting_account_id=true"
+          terraform -chdir=bootstrap plan -input=false -out=tfplan
+          terraform -chdir=bootstrap apply -input=false -auto-approve tfplan
