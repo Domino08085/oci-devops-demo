@@ -18,56 +18,56 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      # - name: Write OCI API key
-      #   run: |
-      #     mkdir -p ~/.oci
-      #     echo "${{ secrets.OCI_PRIVATE_KEY_PEM }}" > ~/.oci/oci_api_key.pem
-      #     chmod 600 ~/.oci/oci_api_key.pem
+      - name: Write OCI API key
+        run: |
+          mkdir -p ~/.oci
+          echo "${{ secrets.OCI_PRIVATE_KEY_PEM }}" > ~/.oci/oci_api_key.pem
+          chmod 600 ~/.oci/oci_api_key.pem
 
-      # - name: Write OCI API private key (PEM) to file
-      #   run: |
-      #     mkdir -p ~/.oci
-      #     cat > ~/.oci/oci_api_key.pem <<'EOF'
-      #     ${{ secrets.OCI_PRIVATE_KEY_PEM }}
-      #     EOF
-      #     chmod 600 ~/.oci/oci_api_key.pem
+      - name: Write OCI API private key (PEM) to file
+        run: |
+          mkdir -p ~/.oci
+          cat > ~/.oci/oci_api_key.pem <<'EOF'
+          ${{ secrets.OCI_PRIVATE_KEY_PEM }}
+          EOF
+          chmod 600 ~/.oci/oci_api_key.pem
 
-      # - name: Write OCI config (DEFAULT profile)
-      #   run: |
-      #     mkdir -p ~/.oci
-      #     cat > ~/.oci/config <<'EOF'
-      #     [DEFAULT]
-      #     user=${{ secrets.OCI_USER_OCID }}
-      #     fingerprint=${{ secrets.OCI_FINGERPRINT }}
-      #     tenancy=${{ secrets.OCI_TENANCY_OCID }}
-      #     region=${{ secrets.OCI_REGION }}
-      #     key_file=~/.oci/oci_api_key.pem
-      #     EOF
-      #     chmod 600 ~/.oci/config
+      - name: Write OCI config (DEFAULT profile)
+        run: |
+          mkdir -p ~/.oci
+          cat > ~/.oci/config <<'EOF'
+          [DEFAULT]
+          user=${{ secrets.OCI_USER_OCID }}
+          fingerprint=${{ secrets.OCI_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_TENANCY_OCID }}
+          region=${{ secrets.OCI_REGION }}
+          key_file=~/.oci/oci_api_key.pem
+          EOF
+          chmod 600 ~/.oci/config
 
-      # - name: Sanity check OCI config & key
-      #   run: |
-      #     echo "Config file:"
-      #     sed -n '1,50p' ~/.oci/config
-      #     echo "Key header:"
-      #     head -2 ~/.oci/oci_api_key.pem
-      # - name: Verify key fingerprint
-      #   run: |
-      #     openssl pkcs8 -in ~/.oci/oci_api_key.pem -inform PEM -nocrypt -outform DER \
-      #       | openssl md5 -c
+      - name: Sanity check OCI config & key
+        run: |
+          echo "Config file:"
+          sed -n '1,50p' ~/.oci/config
+          echo "Key header:"
+          head -2 ~/.oci/oci_api_key.pem
+      - name: Verify key fingerprint
+        run: |
+          openssl pkcs8 -in ~/.oci/oci_api_key.pem -inform PEM -nocrypt -outform DER \
+            | openssl md5 -c
 
       - name: Terraform init + apply (local state)
         env:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            
           TF_LOG_PATH: "tf.log"
-          TF_VAR_region:           ${{ secrets.OCI_REGION }}
-          TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
-          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-          TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
-          TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
-          TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
-          TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+          # TF_VAR_region:           ${{ secrets.OCI_REGION }}
+          # TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
+          # TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+          # TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
+          # TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
+          # TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
+          # TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
           set -euxo pipefail
           terraform -version
