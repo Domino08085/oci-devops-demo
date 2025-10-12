@@ -15,3 +15,6 @@ variable "node_shape" {
 variable "node_count" {
   default = 1
 }
+variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
+  default = 50
+}

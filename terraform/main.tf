@@ -27,6 +27,7 @@ resource "oci_containerengine_node_pool" "np" {
   cluster_id     = oci_containerengine_cluster.oke.id
   compartment_id = var.compartment_ocid
   node_shape     = var.node_shape
+  kubernetes_version = var.oke_kubernetes_version
 
   node_config_details {
     size = var.node_count
@@ -35,8 +36,19 @@ resource "oci_containerengine_node_pool" "np" {
       subnet_id           = oci_core_subnet.subnet.id
     }
   }
+
+  node_source_details {
+        source_type = "IMAGE"
+        image_id = data.oci_containerengine_node_pool_option.oke_node_pool_option.sources[0].image_id
+        boot_volume_size_in_gbs = var.node_pool_node_source_details_boot_volume_size_in_gbs
+  }
 }
 
 data "oci_identity_availability_domains" "ADs" {
   compartment_id = var.tenancy_ocid
+}
+
+data "oci_containerengine_node_pool_option" "oke_node_pool_option" {
+  node_pool_option_id  = oci_containerengine_cluster.oke.id
+  compartment_id     = var.compartment_ocid
 }
