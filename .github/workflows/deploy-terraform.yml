@@ -131,6 +131,5 @@ jobs:
           TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
           TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
-          test -f .terraform.lock.hcl || (echo "Lockfile missing! It must be committed." && exit 1)
           terraform init -input=false -reconfigure -lockfile=readonly
           terraform apply -input=false -auto-approve tfplan
