@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: bootstrap
+        working-directory: terraform
     steps:
       - uses: actions/checkout@v4
 
@@ -50,7 +50,7 @@ jobs:
           openssl pkcs8 -in ~/.oci/oci_api_key.pem -inform PEM -nocrypt -outform DER \
             | openssl md5 -c
 
-      - name: Terraform init + apply (local state)
+      - name: Terraform init + plan
         env:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            
@@ -71,3 +71,27 @@ jobs:
           terraform apply -input=false -auto-approve tfplan
           echo "----- TF LOG TAIL -----"
           tail -n 200 tf.log || true
+
+      - name: Upload tfplan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: terraform/tfplan
+
+  terraform-apply:
+    runs-on: ubuntu-latest
+    needs: deploy-terraform
+    environment: dev
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: Download tfplan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: terraform
+          
+      - name: Terraform apply
+        run: |
+          terraform apply -input=false -auto-approve tfplan
