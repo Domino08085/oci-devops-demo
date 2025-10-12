@@ -38,10 +38,6 @@ jobs:
           EOF
           chmod 600 ~/.oci/config
 
-      - name: IAM sanity check
-        run: oci iam user get --user-id "${{ secrets.OCI_USER_OCID }}"
-
-
       - name: Sanity check OCI config & key
         run: |
           echo "Config file:"
