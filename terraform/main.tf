@@ -62,12 +62,12 @@ data "oci_containerengine_node_pool_option" "oke_node_pool_option" {
 }
 
 locals {
-  is_arm      = can(regex("\\.A1\\.", var.node_shape))
-  arch_token  = local.is_arm ? "aarch64" : "x86_64"
+  is_arm     = can(regex("\\.A1\\.", var.node_shape))
+  arch_token = local.is_arm ? "aarch64" : "x86_64"
 
   image_id = one([
-    for s in data.oci_containerengine_node_pool_option.oke_node_pool_option.sources :
+    for s in data.oci_containerengine_node_pool_option.np_opts.sources :
     s.image_id
-    if s.source_type == "IMAGE" && contains(lower(s.source_name), local.arch_token)
+    if s.source_type == "IMAGE" && strcontains(lower(s.source_name), local.arch_token)
   ])
 }
