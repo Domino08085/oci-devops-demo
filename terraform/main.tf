@@ -66,7 +66,7 @@ locals {
   arch_token  = local.is_arm ? "aarch64" : "x86_64"
 
   image_id = one([
-    for s in data.oci_containerengine_node_pool_option.np_opts.sources :
+    for s in data.oci_containerengine_node_pool_option.oke_node_pool_option.sources :
     s.image_id
     if s.source_type == "IMAGE" && contains(lower(s.source_name), local.arch_token)
   ])
