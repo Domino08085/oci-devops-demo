@@ -105,6 +105,11 @@ jobs:
           name: tfplan
           path: terraform
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+          
       - name: Terraform apply
         env:
           TF_IN_AUTOMATION: "1"
