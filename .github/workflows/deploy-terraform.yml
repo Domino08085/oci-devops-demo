@@ -55,13 +55,13 @@ jobs:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            
           TF_LOG_PATH: "tf.log"
-        #   TF_VAR_region:           ${{ secrets.OCI_REGION }}
-        #   TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
-        #   TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-        #   TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
-        #   TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
-        #   TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
-        #   TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+          TF_VAR_region:           ${{ secrets.OCI_REGION }}
+          TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
+          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+          TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
+          TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
+          TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
+          TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
           set -euxo pipefail
           terraform -version
@@ -76,20 +76,6 @@ jobs:
         with:
           name: tfplan
           path: terraform/tfplan
-
-      # - name: Upload lock file
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: terraform-lock
-      #     path: terraform/.terraform.lock.hcl
-          
-      # - name: Upload OCI config and key
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: oci-config
-      #     path: |
-      #       ~/.oci/config
-      #       ~/.oci/oci_api_key.pem
 
   terraform-apply:
     runs-on: ubuntu-latest
@@ -137,13 +123,13 @@ jobs:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            
           TF_LOG_PATH: "tf.log"
-        #   TF_VAR_region:           ${{ secrets.OCI_REGION }}
-        #   TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
-        #   TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
-        #   TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
-        #   TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
-        #   TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
-        #   TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+          TF_VAR_region:           ${{ secrets.OCI_REGION }}
+          TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
+          TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
+          TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
+          TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
+          TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
+          TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
           test -f .terraform.lock.hcl || (echo "Lockfile missing! It must be committed." && exit 1)
           terraform init -input=false -reconfigure -lockfile=readonly

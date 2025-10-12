@@ -1,9 +1,9 @@
-# variable "region" {}
-# variable "tenancy_ocid" {}
-# variable "compartment_ocid" {}
-# variable "user_ocid" {}
-# variable "fingerprint" {}
-# variable "private_key_pem" { sensitive = true }
+variable "region" {}
+variable "tenancy_ocid" {}
+variable "compartment_ocid" {}
+variable "user_ocid" {}
+variable "fingerprint" {}
+variable "private_key_pem" { sensitive = true }
 
 
 variable "oke_kubernetes_version" {
