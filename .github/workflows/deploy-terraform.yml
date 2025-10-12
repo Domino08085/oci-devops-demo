@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-terraform:
+  plan-terraform:
     environment: dev
     runs-on: ubuntu-latest
     defaults:
@@ -91,7 +91,7 @@ jobs:
         with:
           name: tfplan
           path: terraform
-          
+
       - name: Terraform apply
         run: |
           terraform apply -input=false -auto-approve tfplan

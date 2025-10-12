@@ -6,11 +6,11 @@ variable "fingerprint" {}
 variable "private_key_path" {}
 
 variable "oke_kubernetes_version" {
-  default = "v1.29.1"
+  default = "v1.34.1"
 }
 variable "node_shape" {
   default = "VM.Standard.E3.Flex"
 }
 variable "node_count" {
-  default = 2
+  default = 1
 }
