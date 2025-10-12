@@ -75,13 +75,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan
-          path: terraform/tfplan
+          path: tfplan
 
       - name: Upload lock file
         uses: actions/upload-artifact@v4
         with:
           name: terraform-lock
-          path: terraform/.terraform.lock.hcl
+          path: .terraform.lock.hcl
           
       - name: Upload OCI config and key
         uses: actions/upload-artifact@v4
