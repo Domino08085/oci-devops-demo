@@ -131,5 +131,5 @@ jobs:
           TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
           TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
-          terraform init -input=false -reconfigure -lockfile=readonly
+          terraform init -input=false -reconfigure
           terraform apply -input=false -auto-approve tfplan
