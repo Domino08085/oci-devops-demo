@@ -50,9 +50,6 @@ jobs:
           openssl pkcs8 -in ~/.oci/oci_api_key.pem -inform PEM -nocrypt -outform DER \
             | openssl md5 -c
 
-      - name: Object Storage namespace check
-        run: oci os ns get --region "${{ secrets.OCI_REGION }}"
-
       - name: Terraform init + apply (local state)
         env:
           TF_IN_AUTOMATION: "1"
