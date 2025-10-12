@@ -132,4 +132,5 @@ jobs:
           TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
         run: |
           terraform init -input=false -reconfigure
-          terraform apply -input=false -auto-approve tfplan
+          #terraform apply -input=false -auto-approve tfplan
+          terraform destroy -auto-approve
