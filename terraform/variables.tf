@@ -15,6 +15,12 @@ variable "node_shape" {
 variable "node_count" {
   default = 1
 }
+variable "node_ocpus" {
+  default = 2
+}
+variable "node_memory_gbs" {
+  default = 8
+}
 variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
   default = 50
 }
