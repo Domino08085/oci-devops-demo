@@ -68,7 +68,6 @@ jobs:
           terraform init -input=false
           terraform validate
           terraform plan -input=false -out=tfplan
-          terraform apply -input=false -auto-approve tfplan
           echo "----- TF LOG TAIL -----"
           tail -n 200 tf.log || true
 
