@@ -62,15 +62,17 @@ data "oci_containerengine_node_pool_option" "np_opts" {
 }
 
 locals {
-  node_image = one([
+  matching_images = [
     for s in data.oci_containerengine_node_pool_option.np_opts.sources :
     s
     if s.source_type == "IMAGE" &&
        strcontains(lower(s.source_name), "oracle-linux-8") &&
        !strcontains(lower(s.source_name), "aarch64")
-  ])
+  ]
 
-  node_image_id = local.node_image.image_id
+  node_image = length(local.matching_images) > 0 ? local.matching_images[0] : null
+
+  node_image_id = local.node_image != null ? local.node_image.image_id : null
 }
 
 output "available_oke_images" {
