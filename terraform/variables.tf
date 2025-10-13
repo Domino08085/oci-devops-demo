@@ -9,7 +9,7 @@ variable "oke_kubernetes_version" {
   default = "v1.34.1"
 }
 variable "node_shape" {
-  default = "VM.Standard.E3.Flex"
+  default = "VM.Standard.E4.Flex"
 }
 variable "node_count" {
   default = 1
@@ -22,11 +22,6 @@ variable "node_memory_gbs" {
 }
 variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
   default = 50
-}
-
-variable "image_operating_system" {
-  default     = "Oracle Linux"
-  description = "The OS/image installed on all nodes in the node pool."
 }
 
 # variable "node_image_id" {

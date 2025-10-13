@@ -47,7 +47,7 @@ resource "oci_containerengine_node_pool" "np" {
 
   node_source_details {
         source_type = "IMAGE"
-        image_id = lookup(data.oci_core_images.node_pool_images.images[0], "id")
+        image_id = local.node_image_id
         boot_volume_size_in_gbs = var.node_pool_node_source_details_boot_volume_size_in_gbs
   }
 }
@@ -56,10 +56,31 @@ data "oci_identity_availability_domains" "ADs" {
   compartment_id = var.tenancy_ocid
 }
 
-data "oci_core_images" "node_pool_images" {
-  compartment_id           = var.compartment_ocid
-  operating_system         = var.image_operating_system
-  shape                    = var.node_shape
-  sort_by                  = "TIMECREATED"
-  sort_order               = "DESC"
+data "oci_containerengine_node_pool_option" "np_opts" {
+  node_pool_option_id  = oci_containerengine_cluster.oke.id
+  compartment_id     = var.compartment_ocid
+}
+
+locals {
+
+  node_image = one([
+    for s in data.oci_containerengine_node_pool_option.np_opts.sources :
+    s
+    if s.source_type == "IMAGE" &&
+       strcontains(lower(s.source_name), "oracle-linux-8") &&
+       !strcontains(lower(s.source_name), "aarch64") # wyklucz ARM obrazy
+  ])
+
+  node_image_id = local.node_image.image_id
+}
+
+output "available_oke_images" {
+  value = [for s in data.oci_containerengine_node_pool_option.np_opts.sources : {
+    name = s.source_name
+    id   = s.image_id
+  }]
+}
+
+output "selected_image" {
+  value = local.node_image
 }
