@@ -47,7 +47,7 @@ resource "oci_containerengine_node_pool" "np" {
 
   node_source_details {
         source_type = "IMAGE"
-        image_id = local.node_image_id #var.node_image_id
+        image_id = local.node_image_id
         boot_volume_size_in_gbs = var.node_pool_node_source_details_boot_volume_size_in_gbs
   }
 }
