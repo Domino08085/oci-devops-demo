@@ -30,7 +30,7 @@ resource "oci_containerengine_node_pool" "np" {
   kubernetes_version = var.oke_kubernetes_version
 
   dynamic "node_shape_config" {
-    for_each = contains(var.node_shape, ".Flex") ? [1] : []
+    for_each = strcontains(var.node_shape, ".Flex") ? [1] : []
     content {
       ocpus         = var.node_ocpus        
       memory_in_gbs = var.node_memory_gbs   
