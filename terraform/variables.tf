@@ -24,9 +24,9 @@ variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
   default = 50
 }
 
-# variable "node_image_id" {
-#   default = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaawafhb7vmsk5lyxiohqvopofvpylynmq7m6ww3nzuglmpbydcrcfa"
-# }
+variable "node_image_id" {
+  default = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaaa24qxuqkpjds52wpq6jqcbxmf6p4dl56rlpqlz72cn7ycjxrocza"
+}
 
 # Looking for image_id
 # oci compute pic listing list --all | jq -r -c '.data[] | select(."publisher-name" | test ("Ctrl IQ, Inc."))'
