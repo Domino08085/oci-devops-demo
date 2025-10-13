@@ -56,7 +56,7 @@ data "oci_identity_availability_domains" "ADs" {
   compartment_id = var.tenancy_ocid
 }
 
-data "oci_containerengine_node_pool_option" "oke_node_pool_option" {
+data "oci_containerengine_node_pool_option" "np_opts" {
   node_pool_option_id  = oci_containerengine_cluster.oke.id
   compartment_id     = var.compartment_ocid
 }
