@@ -47,7 +47,7 @@ resource "oci_containerengine_node_pool" "np" {
 
   node_source_details {
         source_type = "IMAGE"
-        image_id = var.node_image_id
+        image_id = local.node_image_id #var.node_image_id
         boot_volume_size_in_gbs = var.node_pool_node_source_details_boot_volume_size_in_gbs
   }
 }
@@ -61,3 +61,26 @@ data "oci_containerengine_node_pool_option" "np_opts" {
   compartment_id     = var.compartment_ocid
 }
 
+locals {
+  is_arm     = strcontains(var.node_shape, ".A1.")
+  arch_token = local.is_arm ? "aarch64" : "x86_64"
+
+  node_image = one([
+    for s in data.oci_containerengine_node_pool_option.np_opts.sources :
+    s
+    if s.source_type == "IMAGE"
+    && strcontains(lower(s.source_name), local.arch_token)
+  ])
+
+  node_image_id = local.node_image.image_id
+}
+
+output "oke_available_images" {
+  value = [for s in data.oci_containerengine_node_pool_option.np_opts.sources :
+    { name = s.source_name, id = s.image_id }
+  ]
+}
+
+output "selected_image" {
+  value = local.node_image
+}
