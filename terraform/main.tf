@@ -56,18 +56,9 @@ data "oci_identity_availability_domains" "ADs" {
   compartment_id = var.tenancy_ocid
 }
 
-data "oci_containerengine_node_pool_option" "node_pool_options" {
-  node_pool_option_id  = oci_containerengine_cluster.oke.id
-  compartment_id     = var.compartment_ocid
-}
-
-data "oci_containerengine_node_pools" "all_node_pools" {
-  compartment_id = var.compartment_ocid
-  cluster_id     = oci_containerengine_cluster.oke.id
-}
-
 data "oci_core_images" "node_pool_images" {
   compartment_id           = var.compartment_ocid
+  operating_system         = var.image_operating_system
   shape                    = var.node_shape
   sort_by                  = "TIMECREATED"
   sort_order               = "DESC"

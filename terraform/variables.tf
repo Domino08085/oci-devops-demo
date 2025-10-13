@@ -24,6 +24,11 @@ variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
   default = 50
 }
 
+variable "image_operating_system" {
+  default     = "Oracle Linux"
+  description = "The OS/image installed on all nodes in the node pool."
+}
+
 # variable "node_image_id" {
 #   default = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaawafhb7vmsk5lyxiohqvopofvpylynmq7m6ww3nzuglmpbydcrcfa"
 # }
