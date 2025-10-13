@@ -24,3 +24,11 @@ variable "node_memory_gbs" {
 variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
   default = 50
 }
+
+variable "node_image_id" {
+  default = "ocid1.image.oc1..aaaaaaaawxs4afbc7pqb5h3qfrcotidtinxe42pw2kgw6622iaqmxzxamnaq"
+}
+
+# Looking for image_id
+# oci compute pic listing list --all | jq -r -c '.data[] | select(."publisher-name" | test ("Ctrl IQ, Inc."))'
+# oci compute pic version list --listing-id <listing-id> | jq -r '.data[]."listing-resource-id"'
