@@ -45,6 +45,13 @@ resource "oci_containerengine_node_pool" "np" {
     }
   }
 
+  lifecycle {
+    precondition {
+      condition     = local.image_id != null
+      error_message = "Nie udało się wybrać obrazu dla node poola (lista sources pusta)."
+    }
+  }
+
   node_source_details {
         source_type = "IMAGE"
         image_id = local.image_id
@@ -62,12 +69,34 @@ data "oci_containerengine_node_pool_option" "np_opts" {
 }
 
 locals {
-  is_arm     = can(regex("\\.A1\\.", var.node_shape))
+  is_arm     = strcontains(var.node_shape, ".A1.")
   arch_token = local.is_arm ? "aarch64" : "x86_64"
 
-  image_id = one([
+  candidate_sources = [
     for s in data.oci_containerengine_node_pool_option.np_opts.sources :
-    s.image_id
-    if s.source_type == "IMAGE" && strcontains(lower(s.source_name), local.arch_token)
-  ])
+    s
+    if s.source_type == "IMAGE" && (
+      strcontains(lower(s.source_name), local.arch_token) ||
+      # czasem w nazwach ARM nie ma "aarch64", więc drugi warunek awaryjny:
+      (local.is_arm && strcontains(lower(s.source_name), "a1"))
+    )
+  ]
+
+  image_id = (
+    length(local.candidate_sources) > 0 ?
+      local.candidate_sources[0].image_id :
+      (
+        length(data.oci_containerengine_node_pool_option.np_opts.sources) > 0 ?
+          data.oci_containerengine_node_pool_option.np_opts.sources[0].image_id :
+          null
+      )
+  )
+}
+
+output "np_sources_names" {
+  value = [for s in data.oci_containerengine_node_pool_option.np_opts.sources : s.source_name]
+}
+
+output "picked_image_id" {
+  value = local.image_id
 }
