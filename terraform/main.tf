@@ -65,20 +65,29 @@ locals {
   is_arm     = strcontains(var.node_shape, ".A1.")
   arch_token = local.is_arm ? "aarch64" : "x86_64"
 
-  node_image = one([
+  # Filtrujemy listę źródeł
+  matching_sources = [
     for s in data.oci_containerengine_node_pool_option.np_opts.sources :
-    s
-    if s.source_type == "IMAGE"
-    && strcontains(lower(s.source_name), local.arch_token)
-  ])
+    s if s.source_type == "IMAGE" && (
+      strcontains(lower(s.source_name), local.arch_token)
+      || strcontains(lower(s.source_name), "amd64")       # fallback dla x86
+      || (local.is_arm && strcontains(lower(s.source_name), "arm"))
+    )
+  ]
 
-  node_image_id = local.node_image.image_id
+  # Jeśli nic nie znaleziono, weź pierwszy obraz z listy (fallback)
+  node_image = length(local.matching_sources) > 0 ? local.matching_sources[0] : (
+    length(data.oci_containerengine_node_pool_option.np_opts.sources) > 0 ? data.oci_containerengine_node_pool_option.np_opts.sources[0] : null
+  )
+
+  node_image_id = local.node_image != null ? local.node_image.image_id : null
 }
 
-output "oke_available_images" {
-  value = [for s in data.oci_containerengine_node_pool_option.np_opts.sources :
-    { name = s.source_name, id = s.image_id }
-  ]
+output "available_oke_images" {
+  value = [for s in data.oci_containerengine_node_pool_option.np_opts.sources : {
+    name = s.source_name
+    id   = s.image_id
+  }]
 }
 
 output "selected_image" {
