@@ -5,7 +5,6 @@ variable "user_ocid" {}
 variable "fingerprint" {}
 variable "private_key_pem" { sensitive = true }
 
-
 variable "oke_kubernetes_version" {
   default = "v1.34.1"
 }
@@ -26,11 +25,11 @@ variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
 }
 
 variable "node_image_id" {
-  default = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaapaqqkroteefz3utvt67j77rgcqkjeo2iut3yoff2pdc7tp7buasq"
+  default = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaawafhb7vmsk5lyxiohqvopofvpylynmq7m6ww3nzuglmpbydcrcfa"
 }
 
 # Looking for image_id
 # oci compute pic listing list --all | jq -r -c '.data[] | select(."publisher-name" | test ("Ctrl IQ, Inc."))'
 # oci compute pic version list --listing-id <listing-id> | jq -r '.data[]."listing-resource-id"'
-# OR (command with cluster ID)
+# OR (command with cluster image)
 # oci ce node-pool-options get --node-pool-option-id ocid1.cluster.oc1.eu-frankfurt-1.aaaaaaaayzfbvr7o3f5f6c77s7ie4236rcoklvqplju3hvgr2cmeixxndtja --region eu-frankfurt-1
