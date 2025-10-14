@@ -25,7 +25,7 @@ variable "node_pool_node_source_details_boot_volume_size_in_gbs" {
 }
 
 variable "node_image_id" {
-  default = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaaa24qxuqkpjds52wpq6jqcbxmf6p4dl56rlpqlz72cn7ycjxrocza"
+  default = "ocid1.image.oc1.eu-frankfurt-1.aaaaaaaaa24qxuqkpjds52wpq6jqcbxmf6p4dl56rlpqlz72cn7ycjxrocza" # Oracle-Linux-8.10-2025.08.31-0-OKE-1.34.1-1191
 }
 
 # Looking for image_id
