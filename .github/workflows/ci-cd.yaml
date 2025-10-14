@@ -117,7 +117,8 @@ jobs:
           fi
           
           echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
-             --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
+             #--username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
+             --username 'frxdvqsyd4jy/dominik.szczesny@wit.edu.pl' \
              --password-stdin
       
       # =======================================================
