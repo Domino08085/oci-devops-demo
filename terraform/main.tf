@@ -129,7 +129,7 @@ resource "oci_identity_dynamic_group" "oke_nodes_dg" {
 
 # Policy for OKE Nodes (grant necessary permissions)
 resource "oci_identity_policy" "oke_nodes_policy" {
-  compartment_id = var.compartment_ocid
+  compartment_id = var.tenancy_ocid
   name           = "OKE-Node-Policy-Demo"
   description    = "Grants OKE worker nodes necessary permissions."
   statements = [
