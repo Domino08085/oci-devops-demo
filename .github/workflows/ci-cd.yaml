@@ -105,8 +105,13 @@ jobs:
         run: |
           AUTH_TOKEN=$(oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "github-action-token" --lifetime-minutes 20 --query 'data."token"' --raw-output)
           
+          if [ -z "$AUTH_TOKEN" ]; then
+            echo "Failed to generate OCI Auth Token. Check IAM policies."
+            exit 1
+          fi
+          
           echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
-             --username '${{ secrets.OCI_TENANCY_OCID }}/${{ secrets.OCI_USER_OCID }}' \
+             --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
              --password-stdin
       
       # =======================================================
