@@ -112,11 +112,10 @@ jobs:
           if [ -z "$AUTH_TOKEN" ]; then
             echo "Failed to generate OCI Auth Token. Check IAM policies."
             exit 1
+          else
+            echo "OCI Auth Token generated."
+            exit 0
           fi
-          
-          # echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
-          #    --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
-          #    --password-stdin
       
       # =======================================================
       # BUILD & PUSH (CI)
