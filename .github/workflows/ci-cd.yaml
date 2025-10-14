@@ -107,19 +107,29 @@ jobs:
 
       - name: Log in to Oracle Container Registry (OCIR) via OCI CLI
         run: |
-          #AUTH_TOKEN=$(oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "github-action-token" --query 'data."token"' --raw-output)
 
-          AUTH_TOKEN='${{ secrets.OCI_AUTH_TOKEN }}'
-          
+          EXISTING_TOKEN_IDS=$(oci iam auth-token list --user-id ${{ secrets.OCI_USER_OCID }} --query "data[].id" --raw-output || true)
+          if [ -n "$EXISTING_TOKEN_IDS" ]; then
+            for TOKEN_ID in $EXISTING_TOKEN_IDS; do
+              echo "Deleting token with ID: $TOKEN_ID"
+              oci iam auth-token delete --user-id ${{ secrets.OCI_USER_OCID }} --token-id $TOKEN_ID --force
+            done
+          fi
+
+          AUTH_TOKEN=$(oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "github-action-token-$(date +%s)" --query 'data."token"' --raw-output)
+
           if [ -z "$AUTH_TOKEN" ]; then
-            echo "Failed to generate OCI Auth Token. Check IAM policies."
+            echo "!!! Failed to generate OCI Auth Token. Check OCI CLI configuration and IAM permissions."
+            echo "--- Retrying with --debug to find the error ---"
+            oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "debug-token" --debug
             exit 1
           fi
           
+          echo "--- Successfully created token. Logging in to OCIR... ---"
+          
           echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
-             #--username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
-             --username 'frxdvqsyd4jy/dominik.szczesny@wit.edu.pl' \
-             --password-stdin
+            --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
+            --password-stdin
       
       # =======================================================
       # BUILD & PUSH (CI)
