@@ -101,6 +101,11 @@ jobs:
           EOF
           chmod 600 ~/.oci/config
 
+      - name: Debug OCI CLI Auth
+        run: |
+          # To polecenie pokaże, czy OCI CLI w ogóle jest w stanie się uwierzytelnić
+          oci iam user get --user-id ${{ secrets.OCI_USER_OCID }} --debug 
+
       - name: Log in to Oracle Container Registry (OCIR) via OCI CLI
         run: |
           AUTH_TOKEN=$(oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "github-action-token" --lifetime-minutes 20 --query 'data."token"' --raw-output)
