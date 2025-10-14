@@ -55,7 +55,7 @@ on:
   workflow_dispatch:
 
 env:
-  OCI_REGISTRY: ${{ secrets.OCI_REGION }}.ocir.io
+  OCI_REGISTRY: fra.ocir.io
   IMAGE_TAG: ${{ github.sha }}
   OKE_KUBECONFIG_PATH: '/home/runner/.kube/config'
 
@@ -101,32 +101,12 @@ jobs:
           EOF
           chmod 600 ~/.oci/config
 
-      - name: Debug OCI CLI Auth
-        run: |
-          oci iam user get --user-id ${{ secrets.OCI_USER_OCID }} --debug 
-
-      - name: Log in to Oracle Container Registry (OCIR) via OCI CLI
-        run: |
-
-          oci iam auth-token list --user-id ${{ secrets.OCI_USER_OCID }} --query "data[].id" --raw-output | while read -r TOKEN_ID; do
-            if [ -n "$TOKEN_ID" ]; then
-              echo "Deleting token with ID: $TOKEN_ID"
-              oci iam auth-token delete --user-id ${{ secrets.OCI_USER_OCID }} --auth-token-id "$TOKEN_ID" --force
-            fi
-          done
-          
-          echo "--- Creating new OCI Auth Token ---"
-          AUTH_TOKEN=$(oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "github-action-token-$(date +%s)" --query 'data."token"' --raw-output)
-          
-          if [ -z "$AUTH_TOKEN" ]; then
-            echo "Failed to generate OCI Auth Token."
-            exit 1
-          fi
-          
-          echo "--- Logging in to OCIR ---"
-          echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
-            --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
-            --password-stdin
+      - name: Docker login to OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.OCI_REGISTRY }}
+          username: ${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}
+          password: ${{ secrets.OCI_AUTH_TOKEN }}
       
       # =======================================================
       # BUILD & PUSH (CI)
@@ -159,7 +139,7 @@ jobs:
         with:
           version: 'v1.28.0'
 
-      - name: 🔄 Update Kubernetes Manifest (Image Tag)
+      - name: Update Kubernetes Manifest (Image Tag)
         run: |
           FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
           sed -i "s|__IMAGE_TAG_PLACEHOLDER__|${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
