@@ -61,6 +61,7 @@ env:
 
 jobs:
   build_and_deploy:
+    environment: dev
     runs-on: ubuntu-latest
     
     steps:
