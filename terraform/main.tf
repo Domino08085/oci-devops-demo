@@ -37,9 +37,9 @@ resource "oci_core_route_table" "node_route_table" {
   display_name   = "demo-node-rt"
 
   route_rules {
-    cidr_block        = "0.0.0.0/0"
-    network_entity_id = oci_core_nat_gateway.nat_gw.id
-    description       = "Route to NAT Gateway for internet access"
+    destination        = "0.0.0.0/0"
+    network_entity_id  = oci_core_nat_gateway.nat_gw.id
+    description        = "Route to NAT Gateway for internet access"
   }
 }
 
