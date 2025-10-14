@@ -72,7 +72,7 @@ jobs:
       # =======================================================
       
       - name: Setup OCI CLI & Authentication
-        uses: oracle-actions/setup-oci@v1
+        uses: oracle/setup-oci@v1
         with:
           oci-cli-version: 'latest'
           api-private-key: ${{ secrets.OCI_PRIVATE_KEY }}
