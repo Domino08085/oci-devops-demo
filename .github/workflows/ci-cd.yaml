@@ -108,13 +108,12 @@ jobs:
       - name: Log in to Oracle Container Registry (OCIR) via OCI CLI
         run: |
 
-          EXISTING_TOKEN_IDS=$(oci iam auth-token list --user-id ${{ secrets.OCI_USER_OCID }} --query "data[].id" --raw-output || true)
-          if [ -n "$EXISTING_TOKEN_IDS" ]; then
-            for TOKEN_ID in $EXISTING_TOKEN_IDS; do
+          oci iam auth-token list --user-id ${{ secrets.OCI_USER_OCID }} --query "data[].id" --raw-output | while read -r TOKEN_ID; do
+            if [ -n "$TOKEN_ID" ]; then
               echo "Deleting token with ID: $TOKEN_ID"
-              oci iam auth-token delete --user-id ${{ secrets.OCI_USER_OCID }} --token-id $TOKEN_ID --force
-            done
-          fi
+              oci iam auth-token delete --user-id ${{ secrets.OCI_USER_OCID }} --auth-token-id "$TOKEN_ID" --force
+            fi
+          done
 
           AUTH_TOKEN=$(oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "github-action-token-$(date +%s)" --query 'data."token"' --raw-output)
 
