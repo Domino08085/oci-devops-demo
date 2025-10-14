@@ -103,7 +103,6 @@ jobs:
 
       - name: Debug OCI CLI Auth
         run: |
-          # To polecenie pokaże, czy OCI CLI w ogóle jest w stanie się uwierzytelnić
           oci iam user get --user-id ${{ secrets.OCI_USER_OCID }} --debug 
 
       - name: Log in to Oracle Container Registry (OCIR) via OCI CLI
@@ -115,9 +114,9 @@ jobs:
             exit 1
           fi
           
-          echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
-             --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
-             --password-stdin
+          # echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
+          #    --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
+          #    --password-stdin
       
       # =======================================================
       # BUILD & PUSH (CI)
