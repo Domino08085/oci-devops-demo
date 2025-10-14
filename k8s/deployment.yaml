@@ -1,19 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo-app
+  name: demo-python-app
+  labels:
+    app: python-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demo-app
+      app: demo-python-app
   template:
     metadata:
       labels:
-        app: demo-app
+        app: demo-python-app
     spec:
       containers:
-      - name: demo-app
-        image: REPLACE_IMAGE
+      - name: demo-python-app
+        image: ${{ secrets.OCI_REGION }}.ocir.io/${{ secrets.OCIR_APP_REPO }}:__IMAGE_TAG_PLACEHOLDER__
         ports:
         - containerPort: 8080

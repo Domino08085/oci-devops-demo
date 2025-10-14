@@ -12,12 +12,20 @@ oci-devops-demo/
 ├── k8s/
 │   ├── deployment.yaml
 │   └── service.yaml
+├── bootstrap/
+│   ├── main.tf
+│   ├── provider.tf
+│   └── variables.tf
 ├── terraform/
 │   ├── main.tf
 │   ├── variables.tf
 │   ├── outputs.tf
 │   └── provider.tf
+│   └── backend.tf
 └── .github/
     └── workflows/
         └── ci-cd.yml
+        └── bootstrap-tfstate.yml
+        └── deploy-terraform.yml
+        └── destroy-terraform.yml
 
