@@ -114,18 +114,16 @@ jobs:
               oci iam auth-token delete --user-id ${{ secrets.OCI_USER_OCID }} --auth-token-id "$TOKEN_ID" --force
             fi
           done
-
+          
+          echo "--- Creating new OCI Auth Token ---"
           AUTH_TOKEN=$(oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "github-action-token-$(date +%s)" --query 'data."token"' --raw-output)
-
+          
           if [ -z "$AUTH_TOKEN" ]; then
-            echo "!!! Failed to generate OCI Auth Token. Check OCI CLI configuration and IAM permissions."
-            echo "--- Retrying with --debug to find the error ---"
-            oci iam auth-token create --user-id ${{ secrets.OCI_USER_OCID }} --description "debug-token" --debug
+            echo "Failed to generate OCI Auth Token."
             exit 1
           fi
           
-          echo "--- Successfully created token. Logging in to OCIR... ---"
-          
+          echo "--- Logging in to OCIR ---"
           echo $AUTH_TOKEN | docker login ${{ env.OCI_REGISTRY }} \
             --username '${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}' \
             --password-stdin
