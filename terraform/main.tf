@@ -124,7 +124,7 @@ resource "oci_identity_dynamic_group" "oke_nodes_dg" {
   name           = "OKE_Nodes_Demo_DG"
   description    = "Dynamic Group for OKE worker nodes in demo cluster"
   # Rule to match instances with the specific tag
-  matching_rule = "All {instance.tag.'oke-nodepool-tag' = 'demo-nodepool-${oci_containerengine_cluster.oke.name}'}"
+  matching_rule  = "All {instance.freeformtags[\"oke-nodepool-tag\"] = 'demo-nodepool-${oci_containerengine_cluster.oke.name}'}"
 }
 
 # Policy for OKE Nodes (grant necessary permissions)
