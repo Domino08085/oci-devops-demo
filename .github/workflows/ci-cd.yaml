@@ -99,7 +99,7 @@ jobs:
             --cluster-id ${{ secrets.OKE_CLUSTER_OCID }} \
             --file ${{ env.OKE_KUBECONFIG_PATH }} \
             --region ${{ secrets.OCI_REGION }} \
-            --token-version 2.0 \
+            --token-version 2.0.0 \
             --overwrite
             
       - name: Setup Kubectl
