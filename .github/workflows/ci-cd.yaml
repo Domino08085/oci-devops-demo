@@ -112,7 +112,10 @@ jobs:
           FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
           sed -i "s|__IMAGE_TAG_PLACEHOLDER__|${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
 
-      - name: Apply Kubernetes Manifest to OKE
+      - name: Apply manifests
+        env:
+          IMAGE: ${{ steps.img.outputs.IMAGE }}
+          K8S_NAMESPACE: demo
         run: |
-          kubectl apply -f k8s/
-          kubectl rollout status deployment/demo-python-app
+          envsubst < k8s/deployment.yaml | kubectl apply -f -
+          envsubst < k8s/service.yaml    | kubectl apply -f -

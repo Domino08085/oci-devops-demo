@@ -2,8 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: demo-python-app
+  namespace: ${K8S_NAMESPACE}
   labels:
-    app: python-app
+    app: demo-python-app
 spec:
   replicas: 1
   selector:
@@ -14,8 +15,17 @@ spec:
       labels:
         app: demo-python-app
     spec:
+      imagePullSecrets:
+        - name: ocir-pull
       containers:
-      - name: demo-python-app
-        image: ${{ secrets.OCI_REGION }}.ocir.io/${{ secrets.OCIR_APP_REPO }}:__IMAGE_TAG_PLACEHOLDER__
-        ports:
-        - containerPort: 8080
+        - name: demo-python-app
+          image: ${IMAGE}
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
