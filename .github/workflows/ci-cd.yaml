@@ -67,14 +67,27 @@ jobs:
       # BUILD & PUSH (CI)
       # =======================================================
 
+      - name: Compute image ref
+        id: img
+        run: |
+          IMAGE_NAME=${IMAGE_NAME:-demo-python-app}
+
+          IMAGE="${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_NAMESPACE }}/${IMAGE_NAME}:${{ env.IMAGE_TAG }}"
+          LATEST="${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_NAMESPACE }}/${IMAGE_NAME}:latest"
+
+          echo "IMAGE=$IMAGE"
+          echo "LATEST=$LATEST"
+          echo "IMAGE=$IMAGE"  >> $GITHUB_OUTPUT
+          echo "LATEST=$LATEST" >> $GITHUB_OUTPUT
+      
       - name: Build and Push Docker Image to OCIR
         uses: docker/build-push-action@v5
         with:
           context: ./app
           push: true
           tags: |
-            ${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}
-            ${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_APP_REPO }}:latest
+            ${{ steps.img.outputs.IMAGE }}
+            ${{ steps.img.outputs.LATEST }}
 
       # =======================================================
       # DEPLOYMENT TO OKE (CD)
