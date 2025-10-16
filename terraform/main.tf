@@ -21,6 +21,7 @@ resource "oci_core_subnet" "subnet" {
   display_name        = "demo-subnet"
   prohibit_public_ip_on_vnic = true
   route_table_id              = oci_core_route_table.node_route_table.id
+  security_list_ids           = [oci_core_security_list.node_security_list.id]
 }
 
 # Public route table (to IGW)
@@ -44,6 +45,7 @@ resource "oci_core_subnet" "subnet_lb" {
   prohibit_public_ip_on_vnic     = false
   route_table_id                 = oci_core_route_table.rt_public.id
   dns_label                      = "lb"  
+  security_list_ids           = [oci_core_security_list.lb_security_list.id]
 }
 
 # Security list for public LB subnet
