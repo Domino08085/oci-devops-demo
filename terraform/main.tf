@@ -20,7 +20,63 @@ resource "oci_core_subnet" "subnet" {
   display_name        = "demo-subnet"
   prohibit_public_ip_on_vnic = false
   route_table_id              = oci_core_route_table.node_route_table.id
-  security_list_ids           = [oci_core_security_list.oke_nodes_sl.id]
+  security_list_ids           = [oci_core_security_list.lb_security_list.id]
+}
+
+# Public route table (to IGW)
+resource "oci_core_route_table" "rt_public" {
+  compartment_id = var.compartment_ocid
+  vcn_id         = oci_core_vcn.vcn.id
+  display_name   = "demo-public-rt"
+  route_rules {
+    destination       = "0.0.0.0/0"
+    destination_type  = "CIDR_BLOCK"
+    network_entity_id = oci_core_internet_gateway.ig.id
+  }
+}
+
+# Public subnet for Load Balancer
+resource "oci_core_subnet" "subnet_lb" {
+  compartment_id                 = var.compartment_ocid
+  vcn_id                         = oci_core_vcn.vcn.id
+  cidr_block                     = "10.0.2.0/24"
+  display_name                   = "demo-lb-subnet"
+  prohibit_public_ip_on_vnic     = false
+  route_table_id                 = oci_core_route_table.rt_public.id
+  dns_label                      = "lb"
+}
+
+# Security list for public LB subnet
+resource "oci_core_security_list" "lb_security_list" {
+  compartment_id = var.compartment_ocid
+  vcn_id         = oci_core_vcn.vcn.id
+  display_name   = "demo-lb-security-list"
+
+  ingress_security_rules {
+    protocol = "6" # TCP
+    source   = "0.0.0.0/0"
+    tcp_options {
+      min = 80
+      max = 80
+    }
+    description = "Allow HTTP traffic from anywhere"
+  }
+
+  ingress_security_rules {
+    protocol = "6"
+    source   = "0.0.0.0/0"
+    tcp_options {
+      min = 443
+      max = 443
+    }
+    description = "Allow HTTPS traffic from anywhere"
+  }
+
+  egress_security_rules {
+    protocol = "all"
+    destination = "0.0.0.0/0"
+    description = "Allow all outbound traffic"
+  }
 }
 
 # NAT Gateway (for outbound internet from private subnet)
@@ -43,29 +99,6 @@ resource "oci_core_route_table" "node_route_table" {
   }
 }
 
-# Security lists for OKE nodes
-resource "oci_core_security_list" "oke_nodes_sl" {
-  compartment_id = var.compartment_ocid
-  vcn_id         = oci_core_vcn.vcn.id
-  display_name   = "oke-nodes-sl"
-  
-  # Ingress: SSH (22) with VCN
-  ingress_security_rules {
-    protocol  = "6" # TCP
-    source    = "10.0.0.0/16" # VCN CIDR
-    tcp_options {
-      min = 22
-      max = 22
-    }
-  }
-  
-  # Egress: All traffic to anywhere
-  egress_security_rules {
-    protocol    = "all"
-    destination = "0.0.0.0/0"
-  }
-}
-
 # OKE cluster
 resource "oci_containerengine_cluster" "oke" {
   name            = "demo-oke"
@@ -78,6 +111,7 @@ resource "oci_containerengine_cluster" "oke" {
       pods_cidr    = "10.244.0.0/16"
       services_cidr = "10.96.0.0/16"
     }
+    service_lb_subnet_ids = [oci_core_subnet.subnet_lb.id]
   }
 }
 
