@@ -100,7 +100,7 @@ resource "oci_core_security_list" "node_security_list" {
   # Rule 1: Allow traffic from the LB subnet on the NodePort range
   ingress_security_rules {
     protocol    = "6" # TCP
-    source      = oci_core_subnet.subnet_lb.cidr_block
+    source      = "10.0.2.0/24"
     source_type = "CIDR_BLOCK"
     description = "Allow incoming traffic from LB to NodePorts"
     tcp_options {
@@ -113,7 +113,7 @@ resource "oci_core_security_list" "node_security_list" {
   # Rule 2: Allow nodes to communicate with each other on all ports
   ingress_security_rules {
     protocol    = "all"
-    source      = oci_core_subnet.subnet.cidr_block
+    source      = "10.0.1.0/24"
     source_type = "CIDR_BLOCK"
     description = "Allow node-to-node communication"
   }
