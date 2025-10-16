@@ -148,7 +148,7 @@ resource "oci_identity_policy" "oke_nodes_policy" {
 
 resource "oci_artifacts_container_repository" "demo_repo" {
   compartment_id = var.compartment_ocid
-  display_name   = "demo-python-app-OCIR-repo"
+  display_name   = "demo-python-app-ocir-repo"
   is_public      = false
 }
 
