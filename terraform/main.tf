@@ -44,10 +44,6 @@ resource "oci_core_subnet" "subnet_lb" {
   prohibit_public_ip_on_vnic     = false
   route_table_id                 = oci_core_route_table.rt_public.id
   dns_label                      = "lb"  
-  security_list_ids = [
-    oci_core_security_list.lb_security_list.id,
-    oci_core_vcn.vcn.default_security_list_id
-  ]
 }
 
 # Security list for public LB subnet
@@ -78,7 +74,7 @@ resource "oci_core_security_list" "lb_security_list" {
 
   ingress_security_rules {
     protocol = "6"
-    source   = oci_core_subnet.subnet_lb.cidr_block
+    source   = "10.0.2.0/24"
     tcp_options { 
      min = 30000
      max = 32767 
