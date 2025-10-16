@@ -89,6 +89,41 @@ resource "oci_core_security_list" "lb_security_list" {
   }
 }
 
+# Security list for private node subnet
+resource "oci_core_security_list" "node_security_list" {
+  compartment_id = var.compartment_ocid
+  vcn_id         = oci_core_vcn.vcn.id
+  display_name   = "demo-node-security-list"
+
+  # Rule 1: Allow traffic from the LB subnet on the NodePort range
+  ingress_security_rules {
+    protocol    = "6" # TCP
+    source      = oci_core_subnet.subnet_lb.cidr_block
+    source_type = "CIDR_BLOCK"
+    description = "Allow incoming traffic from LB to NodePorts"
+    tcp_options {
+      # This is the default NodePort range for Kubernetes
+      min = 30000
+      max = 32767
+    }
+  }
+
+  # Rule 2: Allow nodes to communicate with each other on all ports
+  ingress_security_rules {
+    protocol    = "all"
+    source      = oci_core_subnet.subnet.cidr_block
+    source_type = "CIDR_BLOCK"
+    description = "Allow node-to-node communication"
+  }
+
+  # Allow all outbound traffic from nodes
+  egress_security_rules {
+    protocol    = "all"
+    destination = "0.0.0.0/0"
+    description = "Allow all outbound traffic"
+  }
+}
+
 # NAT Gateway (for outbound internet from private subnet)
 resource "oci_core_nat_gateway" "nat_gw" {
   compartment_id = var.compartment_ocid
