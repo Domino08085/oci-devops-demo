@@ -3,6 +3,7 @@ resource "oci_core_vcn" "vcn" {
   compartment_id = var.compartment_ocid
   display_name   = "demo-vcn"
   cidr_block     = "10.0.0.0/16"
+  dns_label      = "demo"
 }
 
 # Internet Gateway (Access to and from the internet)
@@ -18,9 +19,8 @@ resource "oci_core_subnet" "subnet" {
   vcn_id              = oci_core_vcn.vcn.id
   cidr_block          = "10.0.1.0/24"
   display_name        = "demo-subnet"
-  prohibit_public_ip_on_vnic = false
+  prohibit_public_ip_on_vnic = true
   route_table_id              = oci_core_route_table.node_route_table.id
-  security_list_ids           = [oci_core_security_list.lb_security_list.id]
 }
 
 # Public route table (to IGW)
@@ -43,7 +43,11 @@ resource "oci_core_subnet" "subnet_lb" {
   display_name                   = "demo-lb-subnet"
   prohibit_public_ip_on_vnic     = false
   route_table_id                 = oci_core_route_table.rt_public.id
-  dns_label                      = "lb"
+  dns_label                      = "lb"  
+  security_list_ids = [
+    oci_core_security_list.lb_security_list.id,
+    oci_core_vcn.vcn.default_security_list_id
+  ]
 }
 
 # Security list for public LB subnet
