@@ -76,6 +76,16 @@ resource "oci_core_security_list" "lb_security_list" {
     description = "Allow HTTPS traffic from anywhere"
   }
 
+  ingress_security_rules {
+    protocol = "6"
+    source   = oci_core_subnet.subnet_lb.cidr_block
+    tcp_options { 
+     min = 30000
+     max = 32767 
+    }
+    description = "Allow NodePort range from LB subnet"
+  }
+
   egress_security_rules {
     protocol = "all"
     destination = "0.0.0.0/0"
