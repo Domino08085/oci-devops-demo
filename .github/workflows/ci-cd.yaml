@@ -112,6 +112,25 @@ jobs:
           FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
           sed -i "s|__IMAGE_TAG_PLACEHOLDER__|${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
 
+      - name: Ensure namespace exists
+        env:
+          K8S_NAMESPACE: demo
+        run: |
+          kubectl create namespace "$K8S_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create/Update imagePullSecret in that namespace
+        env:
+          K8S_NAMESPACE: demo
+          OCI_REGISTRY: ${{ env.OCI_REGISTRY }}
+        run: |
+          kubectl create secret docker-registry ocir-pull \
+            --docker-server=${OCI_REGISTRY} \
+            --docker-username="${{ secrets.OCIR_NAMESPACE }}/${{ secrets.OCI_USERNAME }}" \
+            --docker-password="${{ secrets.OCI_AUTH_TOKEN }}" \
+            --docker-email="${{ github.actor }}@users.noreply.github.com" \
+            -n "$K8S_NAMESPACE" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Apply manifests
         env:
           IMAGE: ${{ steps.img.outputs.IMAGE }}
