@@ -80,7 +80,7 @@ resource "oci_containerengine_node_pool" "np" {
 
     placement_configs {
       availability_domain = data.oci_identity_availability_domains.ADs.availability_domains[0].name
-      subnet_id           = oci_core_subnet.subnet.id
+      subnet_id           = oci_core_subnet.oke_nodes_subnet.id
     }
   }
 
@@ -127,12 +127,12 @@ resource "oci_containerengine_node_pool" "oci_oke_node_pool" {
     
     size = var.node_count
 
-    node_pool_pod_network_option_details {
-        cni_type          = "OCI_VCN_IP_NATIVE"
-        max_pods_per_node = 5
-        pod_nsg_ids       = []
-        pod_subnet_ids    = ""
-        }
+    # node_pool_pod_network_option_details {
+    #     cni_type          = "OCI_VCN_IP_NATIVE"
+    #     max_pods_per_node = 5
+    #     pod_nsg_ids       = []
+    #     pod_subnet_ids    = ""
+    # }
   }
 
   node_shape_config {
