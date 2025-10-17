@@ -54,28 +54,31 @@ resource "oci_core_security_list" "lb_security_list" {
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = "demo-lb-security-list"
 
-  # Allow incoming traffic from the internet to the Load Balancer listener
+  # INGRESS: Allow internet traffic to the listener on port 80
   ingress_security_rules {
     protocol    = "6" # TCP
     source      = "0.0.0.0/0"
-    source_type = "CIDR_BLOCK"
-    tcp_options {
+    description = "Allow HTTP traffic from anywhere to the listener"
+    tcp_options { 
       min = 80
-      max = 80
+      max = 80 
     }
-    description = "Allow HTTP traffic from anywhere"
   }
 
-  # Allow the Load Balancer to send traffic TO the worker nodes
+  # EGRESS: Allow LB to send traffic TO worker nodes on NodePort range
   egress_security_rules {
     protocol     = "6" # TCP
     destination  = "10.0.1.0/24"
-    destination_type = "CIDR_BLOCK"
-    tcp_options {
-      min = 30000
-      max = 32767
-    }
-    description = "Allow LB to connect to worker nodes on NodePort range"
+    description  = "Allow LB to connect to worker nodes on NodePort range"
+    tcp_options  { min = 30000, max = 32767 }
+  }
+
+  # EGRESS (ICMP): Allow Path MTU Discovery messages towards nodes
+  egress_security_rules {
+    protocol     = "1" # ICMP
+    destination  = "10.0.1.0/24"
+    description  = "Allow ICMP for Path MTU Discovery to nodes"
+    icmp_options { type = 3, code = 4 }
   }
 }
 
@@ -85,40 +88,35 @@ resource "oci_core_security_list" "node_security_list" {
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = "demo-node-security-list"
 
-  # Allow incoming traffic FROM the Load Balancer subnet on the NodePort range
+  # INGRESS: Allow traffic FROM the Load Balancer subnet to NodePorts
   ingress_security_rules {
     protocol    = "6" # TCP
     source      = "10.0.2.0/24"
-    source_type = "CIDR_BLOCK"
-    tcp_options {
-      min = 30000
-      max = 32767
-    }
-    description = "Allow traffic from LB to NodePorts"
+    description = "Allow traffic from LB subnet to NodePorts"
+    tcp_options { min = 30000, max = 32767 }
   }
 
-  # Allow incoming OCI Health Check probes on the NodePort range
+  # INGRESS: Allow OCI Health Checks to reach NodePorts
+  # To jest kluczowe dla statusu "OK" w Load Balancerze
   ingress_security_rules {
     protocol    = "6" # TCP
-    source      = "0.0.0.0/0" # Source for health checks
-    source_type = "CIDR_BLOCK"
-    tcp_options {
-      min = 30000
-      max = 32767
-    }
+    source      = "0.0.0.0/0"
     description = "Allow OCI Health Checks to reach NodePorts"
+    tcp_options { min = 30000, max = 32767 }
   }
 
-  # Allow nodes to send traffic back TO the load balancer
-  egress_security_rules {
-    protocol     = "6" # TCP
-    destination  = "10.0.2.0/24"
-    destination_type = "CIDR_BLOCK"
-    # All ports are allowed for the response
-    description = "Allow nodes to send responses to LB"
+  # INGRESS (ICMP): Allow Path MTU Discovery messages from LB
+  ingress_security_rules {
+    protocol     = "1" # ICMP
+    source       = "10.0.2.0/24"
+    description  = "Allow ICMP for Path MTU Discovery from LB"
+    icmp_options { 
+      type = 3 
+      code = 4 
+    }
   }
-  
-  # Allow nodes to reach the internet (e.g., for pulling images via NAT Gateway)
+
+  # EGRESS: Allow all outbound traffic from nodes to the internet (via NAT)
   egress_security_rules {
     protocol    = "all"
     destination = "0.0.0.0/0"
