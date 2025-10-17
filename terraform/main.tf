@@ -70,7 +70,10 @@ resource "oci_core_security_list" "lb_security_list" {
     protocol     = "6" # TCP
     destination  = "10.0.1.0/24"
     description  = "Allow LB to connect to worker nodes on NodePort range"
-    tcp_options  { min = 30000, max = 32767 }
+    tcp_options  { 
+      min = 30000 
+      max = 32767 
+    }
   }
 
   # EGRESS (ICMP): Allow Path MTU Discovery messages towards nodes
@@ -78,7 +81,10 @@ resource "oci_core_security_list" "lb_security_list" {
     protocol     = "1" # ICMP
     destination  = "10.0.1.0/24"
     description  = "Allow ICMP for Path MTU Discovery to nodes"
-    icmp_options { type = 3, code = 4 }
+    icmp_options { 
+      type = 3 
+      code = 4 
+    }
   }
 }
 
@@ -93,7 +99,10 @@ resource "oci_core_security_list" "node_security_list" {
     protocol    = "6" # TCP
     source      = "10.0.2.0/24"
     description = "Allow traffic from LB subnet to NodePorts"
-    tcp_options { min = 30000, max = 32767 }
+    tcp_options { 
+      min = 30000
+      max = 32767 
+    }
   }
 
   # INGRESS: Allow OCI Health Checks to reach NodePorts
@@ -102,7 +111,10 @@ resource "oci_core_security_list" "node_security_list" {
     protocol    = "6" # TCP
     source      = "0.0.0.0/0"
     description = "Allow OCI Health Checks to reach NodePorts"
-    tcp_options { min = 30000, max = 32767 }
+    tcp_options { 
+      min = 30000
+      max = 32767 
+    }
   }
 
   # INGRESS (ICMP): Allow Path MTU Discovery messages from LB
