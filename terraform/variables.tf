@@ -5,6 +5,11 @@ variable "user_ocid" {}
 variable "fingerprint" {}
 variable "private_key_pem" { sensitive = true }
 
+resource "random_string" "deploy_id" {
+  length  = 4
+  special = false
+}
+
 variable "oke_kubernetes_version" {
   default = "v1.34.1"
 }
