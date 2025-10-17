@@ -15,7 +15,7 @@ resource "oci_core_subnet" "oke_k8s_endpoint_subnet" {
   prohibit_public_ip_on_vnic = true
   route_table_id              = oci_core_route_table.oke_public_route_table.id
   dhcp_options_id            =  oci_core_vcn.vcn.default_dhcp_options_id
-  security_list_ids           = [oci_core_security_list.node_security_list.id]
+  security_list_ids           = [oci_core_security_list.oke_nodes_security_list.id]
 }
 
 resource "oci_core_subnet" "oke_nodes_subnet" {

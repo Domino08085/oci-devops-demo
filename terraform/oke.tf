@@ -14,7 +14,7 @@ resource "oci_containerengine_cluster" "oke" {
       pods_cidr    = "10.244.0.0/16"
       services_cidr = "10.96.0.0/16"
     }
-    service_lb_subnet_ids = [oci_core_subnet.subnet_lb.id]
+    service_lb_subnet_ids = [oci_core_subnet.oke_lb_subnet.id]
   }
 }
 

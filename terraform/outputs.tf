@@ -1,8 +1,14 @@
 output "oke_cluster_id" {
   value = oci_containerengine_cluster.oke.id
 }
-output "subnet_id" {
-  value = oci_core_subnet.subnet.id
+output "endpoint_subnet_id" {
+  value = oci_core_subnet.oke_k8s_endpoint_subnet.id
+}
+output "nodes_subnet_id" {
+  value = oci_core_subnet.oke_nodes_subnet.id
+}
+output "lb_subnet_id" {
+  value = oci_core_subnet.oke_lb_subnet.id
 }
 output "vcn_id" {
   value = oci_core_vcn.vcn.id
