@@ -100,7 +100,7 @@ resource "oci_core_security_list" "node_security_list" {
   # Rule 1: Allow traffic from the LB subnet on the NodePort range
   ingress_security_rules {
     protocol    = "6" # TCP
-    source      = "10.0.2.0/24"
+    source      = "0.0.0.0/0"
     source_type = "CIDR_BLOCK"
     description = "Allow incoming traffic from LB to NodePorts"
     tcp_options {
