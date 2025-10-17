@@ -124,7 +124,7 @@ jobs:
           OCI_REGISTRY: ${{ env.OCI_REGISTRY }}
         run: |
           kubectl create secret docker-registry ocir-pull \
-            --docker-server=${OCI_REGISTRY} \
+            --docker-server="fra.ocir.io" \
             --docker-username="frxdvqsyd4jy/dominik.szczesny@wit.edu.pl" \
             --docker-password="${{ secrets.OCI_AUTH_TOKEN }}" \
             --docker-email="${{ github.actor }}@users.noreply.github.com" \
