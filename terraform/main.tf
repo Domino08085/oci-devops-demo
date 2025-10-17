@@ -54,9 +54,11 @@ resource "oci_core_security_list" "lb_security_list" {
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = "demo-lb-security-list"
 
+  # Allow incoming traffic from the internet to the Load Balancer listener
   ingress_security_rules {
-    protocol = "6" # TCP
-    source   = "0.0.0.0/0"
+    protocol    = "6" # TCP
+    source      = "0.0.0.0/0"
+    source_type = "CIDR_BLOCK"
     tcp_options {
       min = 80
       max = 80
@@ -64,30 +66,16 @@ resource "oci_core_security_list" "lb_security_list" {
     description = "Allow HTTP traffic from anywhere"
   }
 
-  ingress_security_rules {
-    protocol = "6"
-    source   = "0.0.0.0/0"
-    tcp_options {
-      min = 443
-      max = 443
-    }
-    description = "Allow HTTPS traffic from anywhere"
-  }
-
-  ingress_security_rules {
-    protocol = "6"
-    source   = "10.0.2.0/24"
-    tcp_options { 
-     min = 30000
-     max = 32767 
-    }
-    description = "Allow NodePort range from LB subnet"
-  }
-
+  # Allow the Load Balancer to send traffic TO the worker nodes
   egress_security_rules {
-    protocol = "all"
-    destination = "0.0.0.0/0"
-    description = "Allow all outbound traffic"
+    protocol     = "6" # TCP
+    destination  = "10.0.1.0/24"
+    destination_type = "CIDR_BLOCK"
+    tcp_options {
+      min = 30000
+      max = 32767
+    }
+    description = "Allow LB to connect to worker nodes on NodePort range"
   }
 }
 
@@ -97,32 +85,44 @@ resource "oci_core_security_list" "node_security_list" {
   vcn_id         = oci_core_vcn.vcn.id
   display_name   = "demo-node-security-list"
 
-  # Rule 1: Allow traffic from the LB subnet on the NodePort range
+  # Allow incoming traffic FROM the Load Balancer subnet on the NodePort range
   ingress_security_rules {
     protocol    = "6" # TCP
-    source      = "0.0.0.0/0"
+    source      = "10.0.2.0/24"
     source_type = "CIDR_BLOCK"
-    description = "Allow incoming traffic from LB to NodePorts"
     tcp_options {
-      # This is the default NodePort range for Kubernetes
       min = 30000
       max = 32767
     }
+    description = "Allow traffic from LB to NodePorts"
   }
 
-  # Rule 2: Allow nodes to communicate with each other on all ports
+  # Allow incoming OCI Health Check probes on the NodePort range
   ingress_security_rules {
-    protocol    = "all"
-    source      = "10.0.1.0/24"
+    protocol    = "6" # TCP
+    source      = "0.0.0.0/0" # Source for health checks
     source_type = "CIDR_BLOCK"
-    description = "Allow node-to-node communication"
+    tcp_options {
+      min = 30000
+      max = 32767
+    }
+    description = "Allow OCI Health Checks to reach NodePorts"
   }
 
-  # Allow all outbound traffic from nodes
+  # Allow nodes to send traffic back TO the load balancer
+  egress_security_rules {
+    protocol     = "6" # TCP
+    destination  = "10.0.2.0/24"
+    destination_type = "CIDR_BLOCK"
+    # All ports are allowed for the response
+    description = "Allow nodes to send responses to LB"
+  }
+  
+  # Allow nodes to reach the internet (e.g., for pulling images via NAT Gateway)
   egress_security_rules {
     protocol    = "all"
     destination = "0.0.0.0/0"
-    description = "Allow all outbound traffic"
+    description = "Allow all outbound traffic to the internet"
   }
 }
 
