@@ -2,22 +2,6 @@ resource "tls_private_key" "public_private_key_pair" {
   algorithm = "RSA"
 }
 
-# OKE cluster
-resource "oci_containerengine_cluster" "oke" {
-  name            = "demo-oke"
-  compartment_id  = var.compartment_ocid
-  vcn_id          = oci_core_vcn.vcn.id
-  kubernetes_version = var.oke_kubernetes_version
-
-  options {
-    kubernetes_network_config {
-      pods_cidr    = "10.244.0.0/16"
-      services_cidr = "10.96.0.0/16"
-    }
-    service_lb_subnet_ids = [oci_core_subnet.oke_lb_subnet.id]
-  }
-}
-
 resource "oci_containerengine_cluster" "oci_oke_cluster" {
   compartment_id     = var.compartment_ocid
   kubernetes_version = var.oke_kubernetes_version
