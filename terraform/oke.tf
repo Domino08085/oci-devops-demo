@@ -10,7 +10,7 @@ resource "oci_containerengine_cluster" "oci_oke_cluster" {
   type               = "BASIC_CLUSTER"
 
   endpoint_config {
-    is_public_ip_enabled = false
+    is_public_ip_enabled = true
     subnet_id            = oci_core_subnet.oke_k8s_endpoint_subnet.id
     nsg_ids              = []
   }
