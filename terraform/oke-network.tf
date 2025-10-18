@@ -73,7 +73,7 @@ resource "oci_core_route_table" "oke_private_route_table" {
     description       = "Traffic to OCI services"
     destination       = lookup(data.oci_core_services.all_services.services[0], "cidr_block")
     destination_type  = "SERVICE_CIDR_BLOCK"
-    network_entity_id = oci_core_service_gateway.oke_service_gateway[0].id
+    network_entity_id = oci_core_service_gateway.oke_service_gateway.id
   }
 }
 
