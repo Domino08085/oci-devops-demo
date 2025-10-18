@@ -118,7 +118,7 @@ jobs:
           name: tfplan
           path: terraform
 
-      - name: Terraform apply
+      - name: Terraform destroy
         env:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            

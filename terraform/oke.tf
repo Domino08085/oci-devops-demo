@@ -54,43 +54,6 @@ resource "oci_containerengine_cluster" "oci_oke_cluster" {
   }
 }
 
-# Node Pool
-resource "oci_containerengine_node_pool" "np" {
-  name           = "demo-nodepool"
-  cluster_id     = oci_containerengine_cluster.oke.id
-  compartment_id = var.compartment_ocid
-  node_shape     = var.node_shape
-  kubernetes_version = var.oke_kubernetes_version
-
-  dynamic "node_shape_config" {
-    for_each = strcontains(var.node_shape, ".Flex") ? [1] : []
-    content {
-      ocpus         = var.node_ocpus        
-      memory_in_gbs = var.node_memory_gbs   
-    }
-  }
-
-  node_config_details {
-
-    size = var.node_count
-
-    freeform_tags = {
-      "oke-nodepool-tag" = "demo-nodepool-${oci_containerengine_cluster.oke.name}"
-    }
-
-    placement_configs {
-      availability_domain = data.oci_identity_availability_domains.ADs.availability_domains[0].name
-      subnet_id           = oci_core_subnet.oke_nodes_subnet.id
-    }
-  }
-
-  node_source_details {
-        source_type = "IMAGE"
-        image_id = var.node_image_id # local.node_image_id
-        boot_volume_size_in_gbs = var.node_pool_node_source_details_boot_volume_size_in_gbs
-  }
-}
-
 resource "oci_containerengine_node_pool" "oci_oke_node_pool" {
   cluster_id         = oci_containerengine_cluster.oci_oke_cluster.id
   compartment_id     = var.compartment_ocid
