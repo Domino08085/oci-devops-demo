@@ -104,6 +104,6 @@ data "oci_identity_availability_domains" "ADs" {
 }
 
 data "oci_containerengine_node_pool_option" "np_opts" {
-  node_pool_option_id  = oci_containerengine_cluster.oke.id
+  node_pool_option_id  = oci_containerengine_cluster.oci_oke_cluster.id
   compartment_id     = var.compartment_ocid
 }
