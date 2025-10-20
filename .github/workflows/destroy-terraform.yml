@@ -38,18 +38,6 @@ jobs:
           EOF
           chmod 600 ~/.oci/config
 
-      - name: Sanity check OCI config & key
-        run: |
-          echo "Config file:"
-          sed -n '1,50p' ~/.oci/config
-          echo "Key header:"
-          head -2 ~/.oci/oci_api_key.pem
-          
-      - name: Verify key fingerprint
-        run: |
-          openssl pkcs8 -in ~/.oci/oci_api_key.pem -inform PEM -nocrypt -outform DER \
-            | openssl md5 -c
-
       - name: Terraform init + plan
         env:
           TF_IN_AUTOMATION: "1"
@@ -123,13 +111,72 @@ jobs:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            
           TF_LOG_PATH: "tf.log"
+          DEPLOYMENT_NAME:         ${{ secrets.DEPLOYMENT_NAME }}
+          REGION:                  ${{ secrets.OCI_REGION }}
+          K8S_NAMESPACE:           ${{ secrets.K8S_NAMESPACE }}
           TF_VAR_region:           ${{ secrets.OCI_REGION }}
           TF_VAR_tenancy_ocid:     ${{ secrets.OCI_TENANCY_OCID }}
           TF_VAR_compartment_ocid: ${{ secrets.OCI_COMPARTMENT_OCID }}
           TF_VAR_user_ocid:        ${{ secrets.OCI_USER_OCID }}
           TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
-          TF_VAR_namespace:         ${{ secrets.OCIR_NAMESPACE }}
+          TF_VAR_namespace:        ${{ secrets.OCIR_NAMESPACE }}
         run: |
+          set -euo pipefail
           terraform init -input=false -reconfigure
+          CID=$(terraform output -raw oke_cluster_id)
+          echo "OKE_CLUSTER_ID=${CID}" >> $GITHUB_ENV
+          echo "Cluster ID: ${CID}"
+          
+          echo "cleaning up K8s resources before destroying the cluster..."
+          mkdir -p ~/.kube
+          if [ -z "${CID:-}" ]; then
+            echo "ERROR: OKE_CLUSTER_ID not set"; exit 1
+          fi
+
+          oci ce cluster create-kubeconfig \
+            --cluster-id "${CID}" \
+            --file "$HOME/.kube/config" \
+            --region "${REGION}" \
+            --token-version 2.0.0 \
+            --kube-endpoint PUBLIC_ENDPOINT
+
+          chmod 600 "$HOME/.kube/config"
+          kubectl version --client
+          kubectl get nodes
+
+          if [ -z "${K8S_NAMESPACE:-}" ]; then
+            echo "ERROR: K8S_NAMESPACE not set"; exit 1
+          fi
+          echo "Namespace: ${K8S_NAMESPACE}"
+
+          SVC_LB=$(kubectl get svc -n "${K8S_NAMESPACE}" -o json | jq -r '.items[] | select(.spec.type=="LoadBalancer") | .metadata.name' || true)
+          if [ -n "${SVC_LB}" ]; then
+            echo "${SVC_LB}" | xargs -r -n1 -I{} kubectl delete svc {} -n "${K8S_NAMESPACE}" --ignore-not-found=true
+          else
+            echo "No LoadBalancer Services in ${K8S_NAMESPACE}"
+          fi
+
+          TIMEOUT=600
+          START=$(date +%s)
+          while true; do
+            CNT=$(kubectl get svc -n "${K8S_NAMESPACE}" -o json | jq '[.items[] | select(.spec.type=="LoadBalancer")] | length')
+            echo "Remaining LB services: $CNT"
+            [ "$CNT" -eq 0 ] && break
+            [ $(( $(date +%s)-START )) -ge $TIMEOUT ] && { echo "Timeout waiting for LB deletion"; exit 1; }
+            sleep 10
+          done
+
+          echo "Deleting deployment $(DEPLOYMENT_NAME)..."
+          kubectl delete deployment $(DEPLOYMENT_NAME) -n "${K8S_NAMESPACE}" --ignore-not-found=true
+
+          echo "Deleting namespace $(K8S_NAMESPACE)..."
+          kubectl delete namespace "${K8S_NAMESPACE}" --ignore-not-found=true || true
+          
+          echo "Waiting for namespace ${K8S_NAMESPACE} to be deleted..."
+          for i in $(seq 1 60); do
+            kubectl get ns "${K8S_NAMESPACE}" >/dev/null 2>&1 || { echo "Namespace ${K8S_NAMESPACE} gone."; break; }
+            sleep 5
+          done
+
           terraform destroy -auto-approve

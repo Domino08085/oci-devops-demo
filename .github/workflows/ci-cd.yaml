@@ -13,6 +13,7 @@ env:
   OCI_REGISTRY: fra.ocir.io
   IMAGE_TAG: ${{ github.sha }}
   OKE_KUBECONFIG_PATH: '/home/runner/.kube/config'
+  OCIR_APP_REPO: demo-ocir-repo
 
 jobs:
   build_and_deploy:
@@ -93,10 +94,29 @@ jobs:
       # DEPLOYMENT TO OKE (CD)
       # =======================================================
 
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+
+      - name: Terraform read state and output
+        env:
+          TF_IN_AUTOMATION: "1"
+        run: |
+          terraform init -input=false -reconfigure
+
+      - name: Export OKE_CLUSTER_ID
+        run: |
+          set -euo pipefail
+          CID=$(terraform output -raw oke_cluster_id)
+          echo "OKE_CLUSTER_ID=${CID}" >> $GITHUB_ENV
+          echo "Cluster ID: ${CID}"
+
       - name: Get Kubeconfig for OKE Cluster
         run: |
           oci ce cluster create-kubeconfig \
-            --cluster-id ${{ secrets.OKE_CLUSTER_OCID }} \
+            --cluster-id ${{ env.OKE_CLUSTER_ID }} \
             --file ${{ env.OKE_KUBECONFIG_PATH }} \
             --region ${{ secrets.OCI_REGION }} \
             --token-version 2.0.0 \
@@ -109,14 +129,8 @@ jobs:
 
       - name: Update Kubernetes Manifest (Image Tag)
         run: |
-          FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ secrets.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
+          FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ env.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
           sed -i "s|__IMAGE_TAG_PLACEHOLDER__|${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
-
-      - name: Ensure namespace exists
-        env:
-          K8S_NAMESPACE: demo
-        run: |
-          kubectl create namespace "$K8S_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Create/Update imagePullSecret in that namespace
         env:
@@ -125,7 +139,7 @@ jobs:
         run: |
           kubectl create secret docker-registry ocir-pull \
             --docker-server="fra.ocir.io" \
-            --docker-username="frxdvqsyd4jy/dominik.szczesny@wit.edu.pl" \
+            --docker-username="${{ secrets.DOCKER_USERNAME }}" \
             --docker-password="${{ secrets.OCI_AUTH_TOKEN }}" \
             --docker-email="${{ github.actor }}@users.noreply.github.com" \
             -n "$K8S_NAMESPACE" \
@@ -134,7 +148,6 @@ jobs:
       - name: Apply manifests
         env:
           IMAGE: ${{ steps.img.outputs.IMAGE }}
-          K8S_NAMESPACE: demo
+          K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
         run: |
-          envsubst < k8s/deployment.yaml | kubectl apply -f -
-          envsubst < k8s/service.yaml    | kubectl apply -f -
+          envsubst < k8s/manifest.yaml | kubectl apply -f -

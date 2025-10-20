@@ -1,3 +1,8 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: ${K8S_NAMESPACE}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,3 +34,16 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: demo-python-app
+  namespace: ${K8S_NAMESPACE}
+spec:
+  type: LoadBalancer
+  selector:
+    app: demo-python-app
+  ports:
+    - port: 80
+      targetPort: 8080
