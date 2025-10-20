@@ -146,6 +146,6 @@ jobs:
           CID=$(terraform output -no-color -raw oke_cluster_id)
           echo "OKE_CLUSTER_ID=$CID"
           echo "Save OKE_CLUSTER_ID in GitHub Environment variables"
-          gh api --method PUT "/repos/$REPO/environments/$ENV_NAME/variables/OKE_CLUSTER_ID" \
-            -f name="OKE_CLUSTER_ID" -f value="$CID" || \
+          gh variable set OKE_CLUSTER_ID --body "$CID" --env $ENV_NAME
+          echo "Saved variable:"
           gh variable get OKE_CLUSTER_ID --env $ENV_NAME
