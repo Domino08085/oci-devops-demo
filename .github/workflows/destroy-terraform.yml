@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  destroy-terraform:
+  plan-terraform:
     environment: dev
     runs-on: ubuntu-latest
     defaults:
@@ -65,9 +65,9 @@ jobs:
           name: tfplan
           path: terraform/tfplan
 
-  terraform-destroy:
+  destroy-terraform:
     runs-on: ubuntu-latest
-    needs: destroy-terraform
+    needs: plan-terraform
     environment: dev
     defaults:
       run:
@@ -79,6 +79,15 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.13.3
+
+      - name: Install OCI CLI
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install oci-cli
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Check OCI CLI
+        run: |
+          oci --version
 
       - name: Write OCI API private key (PEM)
         run: |
@@ -111,6 +120,7 @@ jobs:
           TF_IN_AUTOMATION: "1"
           TF_LOG: "INFO"            
           TF_LOG_PATH: "tf.log"
+          OKE_CLUSTER_ID:          ${{ vars.OKE_CLUSTER_ID }}
           DEPLOYMENT_NAME:         ${{ secrets.DEPLOYMENT_NAME }}
           REGION:                  ${{ secrets.OCI_REGION }}
           K8S_NAMESPACE:           ${{ secrets.K8S_NAMESPACE }}
@@ -124,18 +134,15 @@ jobs:
         run: |
           set -euo pipefail
           terraform init -input=false -reconfigure
-          CID=$(terraform output -raw oke_cluster_id)
-          echo "OKE_CLUSTER_ID=${CID}" >> $GITHUB_ENV
-          echo "Cluster ID: ${CID}"
           
           echo "cleaning up K8s resources before destroying the cluster..."
           mkdir -p ~/.kube
-          if [ -z "${CID:-}" ]; then
+          if [ -z "${OKE_CLUSTER_ID:-}" ]; then
             echo "ERROR: OKE_CLUSTER_ID not set"; exit 1
           fi
 
           oci ce cluster create-kubeconfig \
-            --cluster-id "${CID}" \
+            --cluster-id "${OKE_CLUSTER_ID}" \
             --file "$HOME/.kube/config" \
             --region "${REGION}" \
             --token-version 2.0.0 \
