@@ -109,10 +109,10 @@ jobs:
         with:
           version: 'v1.28.0'
 
-      - name: Update Kubernetes Manifest (Image Tag)
-        run: |
-          FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ env.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
-          sed -i "s|__IMAGE_TAG_PLACEHOLDER__|${{ env.IMAGE_TAG }}|g" k8s/deployment.yaml
+      # - name: Update Kubernetes Manifest (Image Tag)
+      #   run: |
+      #     FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ env.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
+      #     sed -i "s|__IMAGE_TAG_PLACEHOLDER__|${{ env.IMAGE_TAG }}|g" k8s/manifest.yaml
 
       - name: Create/Update imagePullSecret in that namespace
         env:
