@@ -148,5 +148,4 @@ jobs:
           echo "Save OKE_CLUSTER_ID in GitHub Environment variables"
           gh api --method PUT "/repos/$REPO/environments/$ENV_NAME/variables/OKE_CLUSTER_ID" \
             -f name="OKE_CLUSTER_ID" -f value="$CID" || \
-          gh api --method POST "/repos/$REPO/environments/$ENV_NAME/variables" \
-            -f name="OKE_CLUSTER_ID" -f value="$CID"
+          gh variable view OKE_CLUSTER_ID --env $ENV_NAME
