@@ -14,6 +14,7 @@ env:
   IMAGE_TAG: ${{ github.sha }}
   OKE_KUBECONFIG_PATH: '/home/runner/.kube/config'
   OCIR_APP_REPO: demo-ocir-repo
+  OKE_CLUSTER_ID: ${{ vars.OKE_CLUSTER_ID }}
 
 jobs:
   build_and_deploy:
@@ -93,25 +94,6 @@ jobs:
       # =======================================================
       # DEPLOYMENT TO OKE (CD)
       # =======================================================
-
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.13.3
-
-      - name: Terraform read state and output
-        env:
-          TF_IN_AUTOMATION: "1"
-        run: |
-          terraform init -input=false -reconfigure
-
-      - name: Export OKE_CLUSTER_ID
-        run: |
-          set -euo pipefail
-          CID=$(terraform output -raw oke_cluster_id)
-          echo "OKE_CLUSTER_ID=${CID}" >> $GITHUB_ENV
-          echo "Cluster ID: ${CID}"
 
       - name: Get Kubeconfig for OKE Cluster
         run: |

@@ -133,3 +133,17 @@ jobs:
         run: |
           terraform init -input=false -reconfigure
           terraform apply -input=false -auto-approve tfplan
+
+      - name: Export variables from outputs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ENV_NAME: dev
+        run: |
+          CID=$(terraform output -no-color -raw oke_cluster_id)
+          echo "OKE_CLUSTER_ID=$CID"
+          echo "Save OKE_CLUSTER_ID in GitHub Environment variables"
+          gh api --method PUT "/repos/$REPO/environments/$ENV_NAME/variables/OKE_CLUSTER_ID" \
+            -f name="OKE_CLUSTER_ID" -f value="$CID" || \
+          gh api --method POST "/repos/$REPO/environments/$ENV_NAME/variables" \
+            -f name="OKE_CLUSTER_ID" -f value="$CID"
