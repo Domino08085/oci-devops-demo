@@ -174,10 +174,10 @@ jobs:
             sleep 10
           done
 
-          echo "Deleting deployment $(DEPLOYMENT_NAME)..."
-          kubectl delete deployment $(DEPLOYMENT_NAME) -n "${K8S_NAMESPACE}" --ignore-not-found=true
+          echo "Deleting deployment ${DEPLOYMENT_NAME}..."
+          kubectl delete deployment ${DEPLOYMENT_NAME} -n "${K8S_NAMESPACE}" --ignore-not-found=true
 
-          echo "Deleting namespace $(K8S_NAMESPACE)..."
+          echo "Deleting namespace ${K8S_NAMESPACE}..."
           kubectl delete namespace "${K8S_NAMESPACE}" --ignore-not-found=true || true
           
           echo "Waiting for namespace ${K8S_NAMESPACE} to be deleted..."
