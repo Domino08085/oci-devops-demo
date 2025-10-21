@@ -75,7 +75,7 @@ jobs:
       # Checkov – JSON (to aggregate and AI analyze)
       - name: Checkov (Terraform) JSON
         run: |
-          checkov -c checkov.yml -o json > results/checkov.json || true
+          checkov -c checkov.yml -o json --quiet > results/checkov.json 2>/dev/null || true
 
       # Skrypt AI – aggregaation, prioritezation, gating
       - name: AI Analyze & Gate

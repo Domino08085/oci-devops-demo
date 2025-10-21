@@ -142,12 +142,13 @@ def load_trivy():
     return results
 
 def load_checkov():
-    """Parsuje JSON z Checkov."""
-    if not CHECKOV_JSON.exists():
+    """Parsuje JSON z Checkov"""
+    data = read_json_relaxed(CHECKOV_JSON)
+    if not data:
         return []
-    data = json.loads(CHECKOV_JSON.read_text() or "{}")
     results = []
-    for r in (data.get("results") or {}).get("failed_checks", []) or []:
+    failed = (data.get("results") or {}).get("failed_checks", []) or []
+    for r in failed:
         msg = r.get("description") or r.get("check_name") or r.get("check_id") or "checkov finding"
         results.append({
             "tool": "checkov",
