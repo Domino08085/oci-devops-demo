@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write   # upload SARIF do Code Scanning
-      pull-requests: write     # komentarz PR (opcjonalny)
+      security-events: write 
+      pull-requests: write 
       actions: read
       id-token: write
 
@@ -46,19 +46,19 @@ jobs:
           pip install checkov==3.2.210
           mkdir -p results tools
 
-      # Trivy – skan IaC (Terraform) i eksport do JSON
+      # Trivy – IaC (Terraform) scan and export to JSON
       - name: Trivy (IaC) JSON
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: config                # IaC/misconfig
+          scan-type: config
           scanners: config
           ignore-unfixed: true
-          exit-code: '0'                   # gating zrobimy w kroku AI
+          exit-code: '0'
           format: 'json'
           output: 'results/trivy.json'
           hide-progress: true
 
-      # Trivy – drugi raz do SARIF (dla Code Scanning)
+      # Trivy – SARIF (for Code Scanning)
       - name: Trivy (IaC) SARIF
         uses: aquasecurity/trivy-action@0.24.0
         with:
@@ -70,35 +70,35 @@ jobs:
           output: 'results/trivy.sarif'
           hide-progress: true
 
-      # Checkov – JSON (do naszej agregacji i AI)
+      # Checkov – JSON (to aggregate and AI analyze)
       - name: Checkov (Terraform) JSON
         run: |
           checkov -d . -o json --config-file checkov.yml > results/checkov.json || true
 
-      # Skrypt AI – agregacja, priorytetyzacja, zalecenia i gating
+      # Skrypt AI – aggregaation, prioritezation, gating
       - name: AI Analyze & Gate
         env:
-          ENABLE_LLM: ${{ vars.ENABLE_LLM }}         # "true"/"false"
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # wymagany do AI
+          ENABLE_LLM: ${{ vars.ENABLE_LLM }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: gpt-4o-mini
         run: |
           chmod +x tools/analyze_security.py
           python3 tools/analyze_security.py
 
-      # Upload SARIF do GitHub Code Scanning
+      # Upload SARIF to GitHub Code Scanning
       - name: Upload SARIF to Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: results/trivy.sarif
 
-      # Artefakty: JSONy + raport MD
+      # Artifacts: JSONs + report
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: security-results
           path: results/
 
-      # (Opcjonalnie) komentarz w PR z krótkim podsumowaniem
+      # (Only for PRs) PR comment with summary
       - name: PR comment (summary)
         if: github.event_name == 'pull_request'
         uses: thollander/actions-comment-pull-request@v2

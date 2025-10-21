@@ -42,7 +42,7 @@ def oci_contextual_risk(item_text: str, file_path: str) -> int:
     t = (item_text or "").lower()
     risk = 3
 
-    # Publiczny endpoint API K8s
+    # Public endpoint OKE
     if ("endpoint" in t and "public" in t) or ("is_public_ip_enabled" in t and "true" in t):
         risk = max(risk, 8)
 
@@ -52,21 +52,21 @@ def oci_contextual_risk(item_text: str, file_path: str) -> int:
     if "tiller" in t or "helm v2" in t:
         risk = max(risk, 10)
 
-    # Public internet / IGW / zbyt szerokie reguły
+    # Public internet / IGW / too permissive SL/NSG
     if "internet gateway" in t or "0.0.0.0/0" in t or "allow all" in t or "all traffic" in t:
         risk = max(risk, 9)
 
-    # LoadBalancer publiczny (zależne od warstwy ochrony)
+    # LoadBalancer public 
     if "loadbalancer" in t and "public" in t:
         risk = max(risk, 7)
 
-    # PSP wyłączone lub brak PSS
+    # PSP disabled or lack of PSS
     if "pod security policy" in t and "disabled" in t:
         risk = max(risk, 7)
     if "pod security standards" in t and ("missing" in t or "not enforced" in t):
         risk = max(risk, 7)
 
-    # Publiczne subnety/NSG
+    # Public subnets/NSGs
     if "public subnet" in t or ("subnet" in t and "public" in t):
         risk = max(risk, 7)
 
@@ -120,7 +120,7 @@ def normalize_severity_to_score(sev: str) -> int:
     table = {"CRITICAL": 10, "HIGH": 8, "MEDIUM": 5, "LOW": 3, "INFO": 1}
     return table.get((sev or "").upper(), 4)
 
-# ---------- Loadery wyników ----------
+# ---------- Loaders of results ----------
 
 def load_trivy():
     """Parsuje JSON z Trivy (scan-type=config)."""
@@ -199,14 +199,14 @@ def main():
         print("OK: no findings")
         return 0
 
-    # scoring: kontekst OCI/OKE vs. severity
+    # scoring: context OCI/OKE vs. severity
     for f in findings:
         context_score = oci_contextual_risk(f["message"], f["path"])
         sev_score = normalize_severity_to_score(f["severity"])
         f["score"] = max(context_score, sev_score)
         f["remediation"] = suggest_remediation(f["message"])
 
-    # deduplikacja: (path,id,message) z preferencją wyższego score
+    # deduplication: (path,id,message) prefer higher score
     uniq = {}
     for f in findings:
         key = (f["path"], f["id"], f["message"])
@@ -214,10 +214,10 @@ def main():
             uniq[key] = f
     findings = sorted(uniq.values(), key=lambda x: x["score"], reverse=True)
 
-    # gating (fail, jeśli jest score ≥ threshold_fail)
+    # gating (fail when threshold_fail)
     fail = any(f["score"] >= threshold_fail for f in findings)
 
-    # raport Markdown
+    # Markdown report
     md = []
     md.append("# Security Report (Terraform / OCI / OKE)\n")
     md.append(f"Data: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
