@@ -125,6 +125,7 @@ def normalize_severity_to_score(sev: str) -> int:
 def load_trivy():
     """Parsuje JSON z Trivy (scan-type=config)."""
     if not TRIVY_JSON.exists():
+        print(f"Warning: Trivy JSON file {TRIVY_JSON} not found.")
         return []
     data = json.loads(TRIVY_JSON.read_text() or "{}")
     results = []
@@ -181,6 +182,7 @@ def load_checkov():
     """Parsuje JSON z Checkov"""
     data = read_json_relaxed(CHECKOV_JSON)
     if not data:
+        print(f"Warning: Checkov JSON file {CHECKOV_JSON} not found or invalid.")
         return []
     results = []
     failed = (data.get("results") or {}).get("failed_checks", []) or []
