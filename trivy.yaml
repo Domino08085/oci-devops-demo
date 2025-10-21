@@ -1,0 +1,7 @@
+format: json
+report: all
+exit-code: 0
+misconfiguration:
+  scanners:
+    - terraform
+terraform:

@@ -55,7 +55,6 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: config
-          scanners: config
           ignore-unfixed: true
           exit-code: '0'
           format: 'json'
@@ -67,7 +66,6 @@ jobs:
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: config
-          scanners: config
           ignore-unfixed: true
           exit-code: '0'
           format: 'sarif'
