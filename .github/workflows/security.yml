@@ -1,4 +1,4 @@
-name: Security Scan (Terraform + Trivy + Checkov + AI)
+name: Security Scan
 
 on:
   pull_request:
@@ -78,7 +78,7 @@ jobs:
       # Skrypt AI – agregacja, priorytetyzacja, zalecenia i gating
       - name: AI Analyze & Gate
         env:
-          ENABLE_LLM: ${{ secrets.ENABLE_LLM }}         # "true"/"false"
+          ENABLE_LLM: ${{ vars.ENABLE_LLM }}         # "true"/"false"
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # wymagany do AI
           OPENAI_MODEL: gpt-4o-mini
         run: |
