@@ -52,25 +52,55 @@ jobs:
 
       # Trivy – IaC (Terraform) scan and export to JSON
       - name: Trivy (IaC) JSON
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: config
-          ignore-unfixed: true
+          trivy-config: trivy.yaml
           exit-code: '0'
           format: 'json'
           output: 'results/trivy.json'
           hide-progress: true
+      
+      - name: Inspect Trivy JSON
+        if: always()
+        run: |
+          echo "== Trivy JSON results =="
+          if [ -s results/trivy.json ]; then
+            jq -r '
+              {
+                results_count:
+                  ([.Results[]? | .Misconfigurations[]?] | length)
+              }
+            ' results/trivy.json
+          else
+            echo "trivy.json missing or empty"
+          fi
 
       # Trivy – SARIF (for Code Scanning)
       - name: Trivy (IaC) SARIF
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: config
-          ignore-unfixed: true
+          trivy-config: trivy.yaml
           exit-code: '0'
           format: 'sarif'
           output: 'results/trivy.sarif'
           hide-progress: true
+      
+      - name: Inspect Trivy SARIF
+        if: always()
+        run: |
+          echo "== Trivy SARIF results =="
+          if [ -s results/trivy.sarif ]; then
+            jq -r '
+              {
+                runs_count: (.runs | length),
+                results_count: ([.runs[]?.results?] | add | length)
+              }
+            ' results/trivy.sarif
+          else
+            echo "trivy.sarif missing or empty"
+          fi
 
       # Checkov – JSON (to aggregate and AI analyze)
       - name: Checkov (Terraform) JSON
@@ -135,7 +165,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
-            ### 🔒 Security report
+            ### Security report
             - Wyniki: artefakt **security-results** + Code Scanning (SARIF).
             - Raport AI: `results/security_report.md`
             > Merge zostanie zablokowany, jeśli wykryto problemy krytyczne (score ≥ 9).
