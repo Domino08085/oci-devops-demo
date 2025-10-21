@@ -84,31 +84,14 @@ jobs:
       - name: Inspect Trivy JSON
         if: always()
         run: |
-          echo "== Trivy JSON results =="
-          if [ -s results/trivy-terraform.json ]; then
-            jq -r '
-              {
-                results_count:
-                  ([.Results[]? | .Misconfigurations[]?] | length)
-              }
-            ' results/trivy.json
-          else
-            echo "trivy.json missing or empty"
-          fi
-
-      - name: Inspect Trivy JSON
-        if: always()
-        run: |
-          echo "== Trivy JSON results =="
-          if [ -s results/trivy-bootstrap.json ]; then
-            jq -r '
-              {
-                results_count:
-                  ([.Results[]? | .Misconfigurations[]?] | length)
-              }
-            ' results/trivy.json
-          else
-            echo "trivy.json missing or empty"
+          for f in results/trivy-terraform.json results/trivy-bootstrap.json; do
+            echo "== $f =="
+            if [ -s "$f" ]; then
+              jq -r '{results_count: ([.Results[]? | .Misconfigurations[]?] | length)}' "$f"
+            else
+              echo "missing or empty"
+            fi
+          done
           fi
 
       # Trivy – SARIF (for Code Scanning)
