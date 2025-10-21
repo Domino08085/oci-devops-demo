@@ -1,11 +1,11 @@
 framework: terraform
-directories:
+directory:
   - ./terraform
   - ./bootstrap
 quiet: true
 download-external-modules: true
 evaluate-variables: true
-skip-paths:
+skip-path:
   - .github/
   - results/
   - app/
