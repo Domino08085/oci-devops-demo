@@ -1,0 +1,110 @@
+name: Security Scan (Terraform + Trivy + Checkov + AI)
+
+on:
+  pull_request:
+    paths:
+      - 'terraform/**'
+      - 'bootstrap/**'
+      - 'k8s/**'
+      - '.trivyignore'
+      - 'checkov.yml'
+      - 'tools/analyze_security.py'
+  push:
+    branches: [ main ]
+    paths:
+      - 'terraform/**'
+      - 'bootstrap/**'
+      - 'k8s/**'
+
+jobs:
+  tf-security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # upload SARIF do Code Scanning
+      pull-requests: write     # komentarz PR (opcjonalny)
+      actions: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Install Checkov
+        run: |
+          python -m pip install --upgrade pip
+          pip install checkov==3.2.210
+          mkdir -p results tools
+
+      # Trivy – skan IaC (Terraform) i eksport do JSON
+      - name: Trivy (IaC) JSON
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: config                # IaC/misconfig
+          scanners: config
+          ignore-unfixed: true
+          exit-code: '0'                   # gating zrobimy w kroku AI
+          format: 'json'
+          output: 'results/trivy.json'
+          hide-progress: true
+
+      # Trivy – drugi raz do SARIF (dla Code Scanning)
+      - name: Trivy (IaC) SARIF
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: config
+          scanners: config
+          ignore-unfixed: true
+          exit-code: '0'
+          format: 'sarif'
+          output: 'results/trivy.sarif'
+          hide-progress: true
+
+      # Checkov – JSON (do naszej agregacji i AI)
+      - name: Checkov (Terraform) JSON
+        run: |
+          checkov -d . -o json --config-file checkov.yml > results/checkov.json || true
+
+      # Skrypt AI – agregacja, priorytetyzacja, zalecenia i gating
+      - name: AI Analyze & Gate
+        env:
+          ENABLE_LLM: ${{ secrets.ENABLE_LLM }}         # "true"/"false"
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # wymagany do AI
+          OPENAI_MODEL: gpt-4o-mini
+        run: |
+          chmod +x tools/analyze_security.py
+          python3 tools/analyze_security.py
+
+      # Upload SARIF do GitHub Code Scanning
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/trivy.sarif
+
+      # Artefakty: JSONy + raport MD
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-results
+          path: results/
+
+      # (Opcjonalnie) komentarz w PR z krótkim podsumowaniem
+      - name: PR comment (summary)
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ### 🔒 Security report
+            - Wyniki: artefakt **security-results** + Code Scanning (SARIF).
+            - Raport AI: `results/security_report.md`
+            > Merge zostanie zablokowany, jeśli wykryto problemy krytyczne (score ≥ 9).

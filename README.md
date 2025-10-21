@@ -10,18 +10,21 @@ oci-devops-demo/
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── k8s/
-│   ├── deployment.yaml
-│   └── service.yaml
+│   ├── manifest.yaml
 ├── bootstrap/
 │   ├── main.tf
 │   ├── provider.tf
 │   └── variables.tf
 ├── terraform/
-│   ├── main.tf
+│   ├── oke.tf
+│   ├── oke-network.tf
+│   ├── oke-policies.tf
+│   ├── oke-security-lists.tf
 │   ├── variables.tf
 │   ├── outputs.tf
 │   └── provider.tf
 │   └── backend.tf
+│   ├── data.tf
 └── .github/
     └── workflows/
         └── ci-cd.yml

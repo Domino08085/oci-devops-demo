@@ -1,0 +1,13 @@
+framework: terraform
+directories:
+  - ./terraform
+  - ./bootstrap
+quiet: true
+download-external-modules: true
+evaluate-variables: true
+skip-paths:
+  - .github/
+  - results/
+  - app/
+  - tools/
+  - k8s/
