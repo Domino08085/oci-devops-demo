@@ -51,21 +51,56 @@ jobs:
           mkdir -p results tools
 
       # Trivy – IaC (Terraform) scan and export to JSON
-      - name: Trivy (IaC) JSON
+      # - name: Trivy (IaC) JSON
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   with:
+      #     scan-type: config
+      #     trivy-config: trivy.yaml
+      #     exit-code: '0'
+      #     format: 'json'
+      #     output: 'results/trivy.json'
+      #     hide-progress: true
+
+      - name: Trivy (IaC) JSON terraform/
         uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: config
-          trivy-config: trivy.yaml
+          format: json
+          output: results/trivy-terraform.json
           exit-code: '0'
-          format: 'json'
-          output: 'results/trivy.json'
           hide-progress: true
+          scan-ref: 'terraform/'
+
+      - name: Trivy (IaC) JSON bootstrap/
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          format: json
+          output: results/trivy-bootstrap.json
+          exit-code: '0'
+          hide-progress: true
+          scan-ref: 'bootstrap/'
       
       - name: Inspect Trivy JSON
         if: always()
         run: |
           echo "== Trivy JSON results =="
-          if [ -s results/trivy.json ]; then
+          if [ -s results/trivy-terraform.json ]; then
+            jq -r '
+              {
+                results_count:
+                  ([.Results[]? | .Misconfigurations[]?] | length)
+              }
+            ' results/trivy.json
+          else
+            echo "trivy.json missing or empty"
+          fi
+
+      - name: Inspect Trivy JSON
+        if: always()
+        run: |
+          echo "== Trivy JSON results =="
+          if [ -s results/trivy-bootstrap.json ]; then
             jq -r '
               {
                 results_count:
