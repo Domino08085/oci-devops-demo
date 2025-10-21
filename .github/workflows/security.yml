@@ -1,20 +1,24 @@
 name: Security Scan
 
+
 on:
-  pull_request:
-    paths:
-      - 'terraform/**'
-      - 'bootstrap/**'
-      - 'k8s/**'
-      - '.trivyignore'
-      - 'checkov.yml'
-      - 'tools/analyze_security.py'
-  push:
-    branches: [ main ]
-    paths:
-      - 'terraform/**'
-      - 'bootstrap/**'
-      - 'k8s/**'
+  workflow_dispatch:
+
+# on:
+#   pull_request:
+#     paths:
+#       - 'terraform/**'
+#       - 'bootstrap/**'
+#       - 'k8s/**'
+#       - '.trivyignore'
+#       - 'checkov.yml'
+#       - 'tools/analyze_security.py'
+#   push:
+#     branches: [ main ]
+#     paths:
+#       - 'terraform/**'
+#       - 'bootstrap/**'
+#       - 'k8s/**'
 
 jobs:
   tf-security:
