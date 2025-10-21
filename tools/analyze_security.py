@@ -141,6 +141,42 @@ def load_trivy():
             })
     return results
 
+def read_json_relaxed(path: pathlib.Path):
+    """
+    Wczytuje JSON nawet jeśli plik ma śmieci przed/za strukturą (np. banery).
+    Strategia:
+      - odetnij wszystko przed pierwszym '{' lub '['
+      - odetnij wszystko po ostatnim '}' lub ']'
+    Jeśli nadal się nie da – zwróć pusty dict.
+    """
+    if not path.exists():
+        return {}
+    raw = path.read_text(encoding="utf-8", errors="ignore")
+    if not raw.strip():
+        return {}
+
+    # znajdź pierwszą klamrę lub nawias
+    start_obj = raw.find("{")
+    start_arr = raw.find("[")
+    starts = [i for i in [start_obj, start_arr] if i != -1]
+    if not starts:
+        return {}
+    start = min(starts)
+
+    # heurystyka końca
+    end_obj = raw.rfind("}")
+    end_arr = raw.rfind("]")
+    ends = [i for i in [end_obj, end_arr] if i != -1]
+    if not ends:
+        return {}
+    end = max(ends) + 1
+
+    candidate = raw[start:end]
+    try:
+        return json.loads(candidate)
+    except json.JSONDecodeError:
+        return {}
+
 def load_checkov():
     """Parsuje JSON z Checkov"""
     data = read_json_relaxed(CHECKOV_JSON)
