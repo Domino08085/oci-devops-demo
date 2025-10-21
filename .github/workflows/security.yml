@@ -78,10 +78,6 @@ jobs:
           mkdir -p results
           CKV_COLOR=false LOG_LEVEL=ERROR \
           checkov --config-file checkov.yml \
-                  --output json \
-                  --output-file-path results/checkov.json \
-                  --quiet || true
-          checkov --config-file checkov.yml \
                   -o json -o sarif \
                   --output-file-path results/checkov.json,results/checkov.sarif \
                   --quiet || true
