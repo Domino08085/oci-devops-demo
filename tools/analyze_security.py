@@ -184,6 +184,11 @@ def load_checkov():
     if not data:
         print(f"Warning: Checkov JSON file {CHECKOV_JSON} not found or invalid.")
         return []
+    print(f"[checkov] file size: {CHECKOV_JSON.stat().st_size} bytes")
+    data = read_json_relaxed(CHECKOV_JSON)
+    if not data:
+        print(f"[checkov] invalid/empty JSON in {CHECKOV_JSON}")
+        return []
     results = []
     failed = (data.get("results") or {}).get("failed_checks", []) or []
     for r in failed:
