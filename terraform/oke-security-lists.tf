@@ -124,6 +124,34 @@ resource "oci_core_security_list" "oke_lb_security_list" {
   compartment_id = var.compartment_ocid
   display_name   = "oke-lb-seclist-${random_string.deploy_id.result}"
   vcn_id         = oci_core_vcn.vcn.id
+
+  # Ingresses
+  ingress_security_rules {
+    description = "Allow inbound traffic to Load Balancers from the internet"
+    source      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
+    source_type = "CIDR_BLOCK"
+    protocol    = local.tcp_protocol_number
+    stateless   = false
+  
+    tcp_options {
+      max = 32767
+      min = 30000
+    }
+  }
+
+  # Egresses
+  egress_security_rules {
+    description      = "Allow Load Balancers to communicate with worker nodes"
+    destination      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
+    destination_type = "CIDR_BLOCK"
+    protocol         = local.tcp_protocol_number
+    stateless        = false
+
+    tcp_options {
+      max = 32767
+      min = 30000
+    }
+  }
 }
 
 resource "oci_core_security_list" "oke_endpoint_security_list" {
