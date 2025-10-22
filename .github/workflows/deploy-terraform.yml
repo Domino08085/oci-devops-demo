@@ -205,7 +205,7 @@ jobs:
           terraform -version
           terraform init -reconfigure -input=false
           terraform validate
-          terraform plan -input=false -out=tfplan
+          terraform plan -input=false -out=tfplan-monitoring
           echo "----- TF LOG TAIL -----"
           tail -n 200 tf.log || true
 
