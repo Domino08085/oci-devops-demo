@@ -51,48 +51,15 @@ jobs:
           mkdir -p results tools
 
       # Trivy – IaC (Terraform) scan and export to JSON
-      # - name: Trivy (IaC) JSON
-      #   uses: aquasecurity/trivy-action@0.28.0
-      #   with:
-      #     scan-type: config
-      #     trivy-config: trivy.yaml
-      #     exit-code: '0'
-      #     format: 'json'
-      #     output: 'results/trivy.json'
-      #     hide-progress: true
-
-      - name: Trivy (IaC) JSON terraform/
+      - name: Trivy (IaC) JSON
         uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: config
-          format: json
-          output: results/trivy-terraform.json
+          trivy-config: trivy.yaml
           exit-code: '0'
+          format: 'json'
+          output: 'results/trivy.json'
           hide-progress: true
-          scan-ref: 'terraform/'
-
-      - name: Trivy (IaC) JSON bootstrap/
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: config
-          format: json
-          output: results/trivy-bootstrap.json
-          exit-code: '0'
-          hide-progress: true
-          scan-ref: 'bootstrap/'
-      
-      - name: Inspect Trivy JSON
-        if: always()
-        run: |
-          for f in results/trivy-terraform.json results/trivy-bootstrap.json; do
-            echo "== $f =="
-            if [ -s "$f" ]; then
-              jq -r '{results_count: ([.Results[]? | .Misconfigurations[]?] | length)}' "$f"
-            else
-              echo "missing or empty"
-            fi
-          done
-          fi
 
       # Trivy – SARIF (for Code Scanning)
       - name: Trivy (IaC) SARIF
@@ -104,21 +71,6 @@ jobs:
           format: 'sarif'
           output: 'results/trivy.sarif'
           hide-progress: true
-      
-      - name: Inspect Trivy SARIF
-        if: always()
-        run: |
-          echo "== Trivy SARIF results =="
-          if [ -s results/trivy.sarif ]; then
-            jq -r '
-              {
-                runs_count: (.runs | length),
-                results_count: ([.runs[]?.results?] | add | length)
-              }
-            ' results/trivy.sarif
-          else
-            echo "trivy.sarif missing or empty"
-          fi
 
       # Checkov – JSON (to aggregate and AI analyze)
       - name: Checkov (Terraform) JSON

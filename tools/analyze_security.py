@@ -1,16 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-Agregacja wyników Trivy (IaC) i Checkov dla Terraform,
-priorytetyzacja kontekstowa (OCI/OKE), propozycje poprawek
-oraz opcjonalne streszczenie i rekomendacje przez OpenAI.
-
-Wyjście:
-- results/security_report.md
-- exit code != 0, jeśli są krytyczne (score ≥ threshold_fail)
-"""
-
 import json
 import os
 import pathlib
@@ -36,8 +26,7 @@ threshold_fail = 9  # 9/10 => CRITICAL
 
 def oci_contextual_risk(item_text: str, file_path: str) -> int:
     """
-    Prosty scoring ryzyka 1..10 (10=highest) dopasowany do projektu:
-    OKE, publiczny endpoint, Dashboard/Tiller, public LB, szerokie SL/NSG, PSP/PSS.
+    Static rules defined on scale 1-10 (10=highest):
     """
     t = (item_text or "").lower()
     risk = 3
@@ -78,42 +67,43 @@ def suggest_remediation(item_text: str) -> list[str]:
 
     if "kubernetes dashboard" in t or "dashboard enabled" in t:
         fixes += [
-            "Ustaw `is_kubernetes_dashboard_enabled = false` w `oci_containerengine_cluster.options.add_ons`.",
-            "Ogranicz dostęp do zarządzania K8s do narzędzi zewnętrznych (kubectl, Lens) i RBAC."
+            "Set `is_kubernetes_dashboard_enabled = false` in `oci_containerengine_cluster.options.add_ons`.",
+            "Limit access to Kubernetes management to external tools (kubectl, Lens) and RBAC."
         ]
 
     if "tiller" in t or "helm v2" in t:
         fixes += [
-            "Ustaw `is_tiller_enabled = false` (zrezygnuj z Helm v2).",
-            "Przejdź na Helm 3 bez Tillera i stosuj RBAC."
+            "Set `is_tiller_enabled = false` (Do not use Helm v2).",
+            "Use Helm 3 without Tiller and enforce RBAC."
         ]
 
     if ("endpoint" in t and "public" in t) or ("is_public_ip_enabled" in t and "true" in t):
         fixes += [
-            "Rozważ `endpoint_config.is_public_ip_enabled = false` (prywatny endpoint) i dostęp przez Bastion/VCN peering.",
-            "Jeśli endpoint musi być publiczny: zawęź NSG/Security Lists do zaufanych CIDR, włącz WAF/IPS, wymuś TLS i SSO."
+            "More safe way is `endpoint_config.is_public_ip_enabled = false` (private endpoint) and access via Bastion/VCN peering.",
+            "If endpoint must be public: restrict NSG/Security Lists to trusted CIDR, enable WAF/IPS, enforce TLS and SSO."
         ]
 
     if "0.0.0.0/0" in t or "allow all" in t or "all traffic" in t or "internet gateway" in t:
         fixes += [
             "Zawęź Security Lists/NSG do konkretnych portów i zaufanych źródeł (zasada najmniejszych uprawnień).",
-            "Zrewiduj trasy (route tables) i zablokuj niepotrzebny ruch do/od internetu."
+            "Tighten Security Lists/NSG rules to the specific ports and trusted sources (least privilege principle)",
+            "Review route tables and block unnecessary internet-bound traffic."
         ]
 
     if "loadbalancer" in t and "public" in t:
         fixes += [
-            "Dodaj WAF/CDN przed LB, wymuś TLS/mTLS, ogranicz źródła (CIDR allowlist).",
-            "Rozważ prywatny LB + publiczny front (WAF/CDN) jako bramkę."
+            "Add WAF/CDN in front of LB, enforce TLS/mTLS, restrict sources (CIDR allowlist).",
+            "Consider private LB + public front (WAF/CDN) as a gateway."
         ]
 
     if "pod security policy" in t and "disabled" in t:
         fixes += [
-            "Wymuś Pod Security Standards (baseline/restricted) lub Gatekeeper/OPA z regułami.",
-            "Stosuj `runAsNonRoot`, `readOnlyRootFilesystem`, `seccompProfile`."
+            "Enforce Pod Security Standards (baseline/restricted) or use Gatekeeper/OPA with policies.",
+            "Use 'runAsNonRoot', 'readOnlyRootFilesystem', 'seccompProfile' settings."
         ]
 
     if not fixes:
-        fixes = ["Zastosuj zasadę najmniejszych uprawnień; ogranicz ekspozycję i włącz kontrolę dostępu."]
+        fixes = ["Implement least privilege principle; reduce exposure and enable access controls."]
     return fixes
 
 def normalize_severity_to_score(sev: str) -> int:
@@ -123,7 +113,7 @@ def normalize_severity_to_score(sev: str) -> int:
 # ---------- Loaders of results ----------
 
 def load_trivy():
-    """Parsuje JSON z Trivy (scan-type=config)."""
+    """Parse JSON from Trivy (scan-type=config)."""
     if not TRIVY_JSON.exists():
         print(f"Warning: Trivy JSON file {TRIVY_JSON} not found.")
         return []
@@ -144,11 +134,7 @@ def load_trivy():
 
 def read_json_relaxed(path: pathlib.Path):
     """
-    Wczytuje JSON nawet jeśli plik ma śmieci przed/za strukturą (np. banery).
-    Strategia:
-      - odetnij wszystko przed pierwszym '{' lub '['
-      - odetnij wszystko po ostatnim '}' lub ']'
-    Jeśli nadal się nie da – zwróć pusty dict.
+    Read JSON file with relaxed parsing
     """
     if not path.exists():
         return {}
@@ -179,7 +165,7 @@ def read_json_relaxed(path: pathlib.Path):
         return {}
 
 def load_checkov():
-    """Parsuje JSON z Checkov"""
+    """Parse JSON from Checkov"""
     data = read_json_relaxed(CHECKOV_JSON)
     if not data:
         print(f"Warning: Checkov JSON file {CHECKOV_JSON} not found or invalid.")
@@ -205,7 +191,7 @@ def load_checkov():
 # ---------- AI (OpenAI Chat Completions) ----------
 
 def maybe_llm_summarize(findings_top):
-    """Zwraca krótkie streszczenie i zalecenia od LLM (jeśli włączone)."""
+    """LLM (chat gpt) summary of top findings"""
     if not ENABLE_LLM or not OPENAI_API_KEY:
         return None
     try:
@@ -264,26 +250,26 @@ def main():
     # Markdown report
     md = []
     md.append("# Security Report (Terraform / OCI / OKE)\n")
-    md.append(f"Data: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-    md.append("## Podsumowanie\n")
-    md.append(f"- Znalezione problemy: **{len(findings)}**")
-    md.append(f"- Krytyczne (score≥{threshold_fail}): **{sum(1 for x in findings if x['score']>=threshold_fail)}**")
-    md.append(f"- Wysokie (score 7–8): **{sum(1 for x in findings if 7<=x['score']<threshold_fail)}**")
-    md.append(f"- Średnie (score 5–6): **{sum(1 for x in findings if 5<=x['score']<7)}**\n")
+    md.append(f"Date: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+    md.append("## Summary\n")
+    md.append(f"- Found issues: **{len(findings)}**")
+    md.append(f"- Critical (score≥{threshold_fail}): **{sum(1 for x in findings if x['score']>=threshold_fail)}**")
+    md.append(f"- High (score 7–8): **{sum(1 for x in findings if 7<=x['score']<threshold_fail)}**")
+    md.append(f"- Medium (score 5–6): **{sum(1 for x in findings if 5<=x['score']<7)}**\n")
 
     llm = maybe_llm_summarize(findings)
     if llm:
-        md.append("## AI – streszczenie i zalecenia\n")
+        md.append("## AI – summary and recommendations\n")
         md.append(llm + "\n")
 
-    md.append("## Szczegóły\n")
+    md.append("## Details\n")
     for f in findings:
         md.append(f"### [{f['severity']}] {f['tool']}:{f['id']} — score {f['score']}/10")
         if f["path"]:
-            md.append(f"**Plik:** `{f['path']}`")
-        md.append(f"**Opis:** {f['message']}")
+            md.append(f"**File:** `{f['path']}`")
+        md.append(f"**Description:** {f['message']}")
         if f["remediation"]:
-            md.append("**Zalecane poprawki:**")
+            md.append("**Recommended changes:**")
             for r in f["remediation"]:
                 md.append(f"- {r}")
         md.append("")
