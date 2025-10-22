@@ -213,7 +213,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-monitoring
-          path: terraform-monitoring/tfplan
+          path: terraform-monitoring/tfplan-monitoring
 
   terraform-apply-monitoring:
     runs-on: ubuntu-latest
