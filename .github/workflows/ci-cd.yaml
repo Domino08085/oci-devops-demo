@@ -34,9 +34,6 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install oci-cli
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Check OCI CLI
-        run: |
-          oci --version
 
       - name: Write OCI API private key (PEM)
         run: |
