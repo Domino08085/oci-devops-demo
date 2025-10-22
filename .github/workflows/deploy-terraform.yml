@@ -216,6 +216,7 @@ jobs:
           TF_VAR_fingerprint:      ${{ secrets.OCI_FINGERPRINT }}
           TF_VAR_private_key_pem:  ${{ secrets.OCI_PRIVATE_KEY_PEM }}
           TF_VAR_namespace:        ${{ secrets.OCIR_NAMESPACE }}
+          KUBE_CONFIG_PATH:        ${{ env.KUBE_CONFIG_PATH }}
         run: |
           set -euxo pipefail
           terraform -version
