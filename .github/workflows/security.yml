@@ -23,6 +23,7 @@ on:
 jobs:
   tf-security:
     runs-on: ubuntu-latest
+    environment: security-scan
     permissions:
       contents: read
       security-events: write 

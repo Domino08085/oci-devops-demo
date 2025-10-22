@@ -225,7 +225,7 @@ def main():
     findings = load_trivy() + load_checkov()
 
     if not findings:
-        OUTPUT_MD.write_text("# Security Report\n\nBrak wykrytych problemów.\n")
+        OUTPUT_MD.write_text("# Security Report\n\nNo issues detected.\n")
         print("OK: no findings")
         return 0
 
