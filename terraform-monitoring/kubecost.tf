@@ -11,12 +11,19 @@ resource "helm_release" "kubecost" {
 
   depends_on = [helm_release.kube_prometheus_stack]
 
+  timeout        = 1200
+  wait           = true
+  atomic         = true
+  wait_for_jobs  = true
+
   values = [<<-YAML
     global:
       grafana:
         enabled: false
+        
     kubecostProductConfigs:
       clusterName: "oke-demo"
+
     prometheus:
       enabled: false
     prometheusConfig:
@@ -24,7 +31,7 @@ resource "helm_release" "kubecost" {
         enabled: false
       external:
         enabled: true
-        url: "http://kube-prometheus-stack-prometheus.monitoring.svc:9090"
+        url: "http://prometheus-operated.monitoring.svc:9090"
     cost-analyzer:
       service:
         type: LoadBalancer
