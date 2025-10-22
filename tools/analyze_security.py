@@ -188,21 +188,20 @@ def load_checkov():
 
 # ---------- AI (OpenAI Chat Completions) ----------
 
-def maybe_llm_summarize(findings_top):
+def llm_summarize(findings):
     """LLM (chat gpt) summary of top findings"""
     if not ENABLE_LLM or not OPENAI_API_KEY:
         return None
     try:
         import json as _json
         import urllib.request
-        prompt = "Zreferuj zwięźle najważniejsze ryzyka i zaproponuj konkretne poprawki Terraform/OCI/OKE dla poniższych problemów:\n\n"
         prompt = "Review the most important risks and propose specific adjustments for Terraform code to the below issues:\n\n"
-        for f in findings_top[:12]:
+        for f in findings:
             prompt += f"- [{f['severity']}/{f['tool']}:{f['id']}] {f['message']} @ {f['path']}\n"
         body = {
             "model": OPENAI_MODEL,
             "messages": [
-                {"role": "system", "content": "You are an expert DevSecOps for Terraform code in OCI cloud. Give a short description of the solution and technical recommendations."},
+                {"role": "system", "content": "You are an expert DevSecOps for Terraform code in OCI cloud. Give a short description of the solution and technical recommendations. Focus on the given issue and be specific."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.2
@@ -256,7 +255,7 @@ def main():
     md.append(f"- High (score 7–8): **{sum(1 for x in findings if 7<=x['score']<threshold_fail)}**")
     md.append(f"- Medium (score 5–6): **{sum(1 for x in findings if 5<=x['score']<7)}**\n")
 
-    llm = maybe_llm_summarize(findings)
+    llm = llm_summarize(findings)
     if llm:
         md.append("## AI – summary and recommendations\n")
         md.append(llm + "\n")
