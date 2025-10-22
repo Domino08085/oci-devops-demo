@@ -142,7 +142,6 @@ def read_json_relaxed(path: pathlib.Path):
     if not raw.strip():
         return {}
 
-    # znajdź pierwszą klamrę lub nawias
     start_obj = raw.find("{")
     start_arr = raw.find("[")
     starts = [i for i in [start_obj, start_arr] if i != -1]
@@ -150,7 +149,6 @@ def read_json_relaxed(path: pathlib.Path):
         return {}
     start = min(starts)
 
-    # heurystyka końca
     end_obj = raw.rfind("}")
     end_arr = raw.rfind("]")
     ends = [i for i in [end_obj, end_arr] if i != -1]
@@ -198,12 +196,13 @@ def maybe_llm_summarize(findings_top):
         import json as _json
         import urllib.request
         prompt = "Zreferuj zwięźle najważniejsze ryzyka i zaproponuj konkretne poprawki Terraform/OCI/OKE dla poniższych problemów:\n\n"
+        prompt = "Review the most important risks and propose specific adjustments for Terraform code to the below issues:\n\n"
         for f in findings_top[:12]:
             prompt += f"- [{f['severity']}/{f['tool']}:{f['id']}] {f['message']} @ {f['path']}\n"
         body = {
             "model": OPENAI_MODEL,
             "messages": [
-                {"role": "system", "content": "Jesteś ekspertem DevSecOps dla OCI/OKE/Terraform. Daj krótkie, techniczne zalecenia."},
+                {"role": "system", "content": "You are an expert DevSecOps for Terraform code in OCI cloud. Give a short description of the solution and technical recommendations."},
                 {"role": "user", "content": prompt}
             ],
             "temperature": 0.2
