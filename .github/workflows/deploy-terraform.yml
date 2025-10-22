@@ -187,6 +187,22 @@ jobs:
           key_file=$HOME/.oci/oci_api_key.pem
           EOF
           chmod 600 ~/.oci/config
+      
+      - name: Install OCI CLI
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install oci-cli
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Get Kubeconfig for OKE Cluster
+        run: |
+          oci ce cluster create-kubeconfig \
+            --cluster-id ${{ vars.OKE_CLUSTER_ID }} \
+            --file '/home/runner/.kube/config' \
+            --region ${{ secrets.OCI_REGION }} \
+            --token-version 2.0.0 \
+            --overwrite
+          echo "KUBE_CONFIG_PATH=/home/runner/.kube/config" >> $GITHUB_ENV
 
       - name: Terraform init + plan
         env:
