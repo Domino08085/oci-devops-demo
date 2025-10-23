@@ -43,6 +43,18 @@ resource "oci_core_security_list" "oke_nodes_security_list" {
     }
   }
 
+  ingress_security_rules {
+  description = "LB subnet to worker NodePorts"
+  source      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
+  source_type = "CIDR_BLOCK"
+  protocol    = local.tcp_protocol_number
+  stateless   = false
+  tcp_options { 
+    min = local.nodeport_min 
+    max = local.nodeport_max 
+  }
+  }
+
   # Egresses
   egress_security_rules {
     description      = "Allow pods on one worker node to communicate with pods on other worker nodes"
@@ -124,6 +136,43 @@ resource "oci_core_security_list" "oke_lb_security_list" {
   compartment_id = var.compartment_ocid
   display_name   = "oke-lb-seclist-${random_string.deploy_id.result}"
   vcn_id         = oci_core_vcn.vcn.id
+
+  # INGRESS from Internet to LB
+  ingress_security_rules {
+    description = "Public HTTP to LB"
+    source      = lookup(var.network_cidrs, "ALL-CIDR")
+    source_type = "CIDR_BLOCK"
+    protocol    = local.tcp_protocol_number
+    stateless   = false
+    tcp_options { 
+      min = local.http_port_number  
+      max = local.http_port_number 
+    }
+  }
+  ingress_security_rules {
+    description = "Public HTTPS to LB"
+    source      = lookup(var.network_cidrs, "ALL-CIDR")
+    source_type = "CIDR_BLOCK"
+    protocol    = local.tcp_protocol_number
+    stateless   = false
+    tcp_options { 
+      min = local.https_port_number 
+      max = local.https_port_number 
+    }
+  }
+
+  # EGRESS from LB to nodes (NodePort range)
+  egress_security_rules {
+    description      = "LB to worker NodePorts"
+    destination      = lookup(var.network_cidrs, "SUBNET-REGIONAL-CIDR") # subnet workerów
+    destination_type = "CIDR_BLOCK"
+    protocol         = local.tcp_protocol_number
+    stateless        = false
+    tcp_options { 
+      min = local.nodeport_min 
+      max = local.nodeport_max 
+    }
+  }
 }
 
 resource "oci_core_security_list" "oke_endpoint_security_list" {
@@ -226,4 +275,6 @@ locals {
   tcp_protocol_number                     = "6"
   icmp_protocol_number                    = "1"
   all_protocols                           = "all"
+  nodeport_min                            = "30000"
+  nodeport_max                            = "32767"
 }
