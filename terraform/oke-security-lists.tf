@@ -42,17 +42,17 @@ resource "oci_core_security_list" "oke_nodes_security_list" {
       code = "4"
     }
   }
-
   ingress_security_rules {
-  description = "LB subnet to worker NodePorts"
-  source      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
-  source_type = "CIDR_BLOCK"
-  protocol    = local.tcp_protocol_number
-  stateless   = false
-  tcp_options { 
-    min = local.nodeport_min 
-    max = local.nodeport_max 
-  }
+    description = "LB subnet to worker NodePorts"
+    source      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
+    source_type = "CIDR_BLOCK"
+    protocol    = local.tcp_protocol_number
+    stateless   = false
+    
+    tcp_options { 
+      min = local.nodeport_min 
+      max = local.nodeport_max 
+    }
   }
 
   # Egresses
@@ -144,6 +144,7 @@ resource "oci_core_security_list" "oke_lb_security_list" {
     source_type = "CIDR_BLOCK"
     protocol    = local.tcp_protocol_number
     stateless   = false
+    
     tcp_options { 
       min = local.http_port_number  
       max = local.http_port_number 
@@ -155,6 +156,7 @@ resource "oci_core_security_list" "oke_lb_security_list" {
     source_type = "CIDR_BLOCK"
     protocol    = local.tcp_protocol_number
     stateless   = false
+
     tcp_options { 
       min = local.https_port_number 
       max = local.https_port_number 
@@ -168,6 +170,7 @@ resource "oci_core_security_list" "oke_lb_security_list" {
     destination_type = "CIDR_BLOCK"
     protocol         = local.tcp_protocol_number
     stateless        = false
+
     tcp_options { 
       min = local.nodeport_min 
       max = local.nodeport_max 
