@@ -20,9 +20,15 @@ resource "helm_release" "kube_prometheus_stack" {
 
     prometheus:
       service:
-        type: LoadBalancer
+        type: ClusterIP
       prometheusSpec:
         retention: 3d
+        serviceMonitorNamespaceSelector: {}
+        serviceMonitorSelector: {}         
+        podMonitorNamespaceSelector: {}     
+        podMonitorSelector: {}                
+        ruleNamespaceSelector: {}
+        ruleSelector: {}
         resources:
           requests:
             cpu: "200m"
@@ -39,5 +45,48 @@ resource "helm_release" "kube_prometheus_stack" {
             cpu: "100m"
             memory: "128Mi"
     YAML
+  ]
+}
+
+resource "helm_release" "kubecost" {
+  name       = "kubecost"
+  repository = "https://kubecost.github.io/cost-analyzer/"
+  chart      = "cost-analyzer"
+  version    = "2.0.0"
+  namespace  = kubernetes_namespace.monitoring.metadata[0].name
+
+  depends_on = [helm_release.kube_prometheus_stack]
+
+  timeout        = 1200
+  wait           = true
+  atomic         = true
+  wait_for_jobs  = true
+
+  values = [<<-YAML
+    global:
+      grafana:
+        enabled: false
+
+    kubecostProductConfigs:
+      clusterName: "oke-demo"
+
+    prometheus:
+      enabled: false
+    prometheusConfig:
+      internal:
+        enabled: false
+      external:
+        enabled: true
+        url: "http://kube-prometheus-stack-prometheus:9090"
+
+    serviceMonitor:
+      enabled: true
+    podMonitor:
+      enabled: true
+
+    cost-analyzer:
+      service:
+        type: ClusterIP
+  YAML
   ]
 }
