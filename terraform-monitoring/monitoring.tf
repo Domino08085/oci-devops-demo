@@ -11,7 +11,7 @@ resource "helm_release" "kube_prometheus_stack" {
 
   values = [<<-YAML
     grafana:
-      adminPassword: "admin123"
+      adminPassword: "${var.adminPassword}"
       service:
         type: LoadBalancer
       defaultDashboardsEnabled: true
