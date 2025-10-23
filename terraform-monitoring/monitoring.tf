@@ -13,7 +13,7 @@ resource "helm_release" "kube_prometheus_stack" {
     grafana:
       adminPassword: "${var.adminPassword}"
       service:
-        type: LoadBalancer
+        type: ClusterIP
       defaultDashboardsEnabled: true
       persistence:
         enabled: false
