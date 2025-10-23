@@ -70,7 +70,7 @@ resource "oci_containerengine_node_pool" "oci_oke_node_pool" {
   }
 
   node_eviction_node_pool_settings {
-    eviction_grace_duration = "PT60M"
+    eviction_grace_duration = "PT1H"
     is_force_delete_after_grace_duration = true
   }
 }
