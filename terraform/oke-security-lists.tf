@@ -42,6 +42,18 @@ resource "oci_core_security_list" "oke_nodes_security_list" {
       code = "4"
     }
   }
+  ingress_security_rules {
+  description = "Allow traffic from LB subnet to NodePort range on workers"
+  source      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
+  source_type = "CIDR_BLOCK"
+  protocol    = local.tcp_protocol_number
+  stateless   = false
+
+  tcp_options {
+    min = 30000
+    max = 32767
+  }
+}
 
   # Egresses
   egress_security_rules {
@@ -127,22 +139,34 @@ resource "oci_core_security_list" "oke_lb_security_list" {
 
   # Ingresses
   ingress_security_rules {
-    description = "Allow inbound traffic to Load Balancers from the internet"
-    source      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
+    description = "HTTP to Load Balancers from the internet"
+    source      = lookup(var.network_cidrs, "ALL-CIDR")
     source_type = "CIDR_BLOCK"
     protocol    = local.tcp_protocol_number
     stateless   = false
   
     tcp_options {
-      max = 32767
-      min = 30000
+      max = 80
+      min = 80
+    }
+  }
+  ingress_security_rules {
+    description = "HTTPS to Load Balancers from the internet"
+    source      = lookup(var.network_cidrs, "ALL-CIDR")
+    source_type = "CIDR_BLOCK"
+    protocol    = local.tcp_protocol_number
+    stateless   = false
+  
+    tcp_options {
+      max = 443
+      min = 443
     }
   }
 
   # Egresses
   egress_security_rules {
-    description      = "Allow Load Balancers to communicate with worker nodes"
-    destination      = lookup(var.network_cidrs, "LB-SUBNET-REGIONAL-CIDR")
+    description      = "LB to worker nodes NodePort range"
+    destination      = lookup(var.network_cidrs, "SUBNET-REGIONAL-CIDR")
     destination_type = "CIDR_BLOCK"
     protocol         = local.tcp_protocol_number
     stateless        = false
