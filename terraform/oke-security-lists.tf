@@ -150,6 +150,30 @@ resource "oci_core_security_list" "oke_lb_security_list" {
       min = 443
     }
   }
+  ingress_security_rules {
+    description = "HTTPS to Load Balancers from the internet"
+    source      = lookup(var.network_cidrs, "ALL-CIDR")
+    source_type = "CIDR_BLOCK"
+    protocol    = local.tcp_protocol_number
+    stateless   = false
+  
+    tcp_options {
+      max = 9090
+      min = 9090
+    }
+  }
+  ingress_security_rules {
+    description = "HTTPS to Load Balancers from the internet"
+    source      = lookup(var.network_cidrs, "ALL-CIDR")
+    source_type = "CIDR_BLOCK"
+    protocol    = local.tcp_protocol_number
+    stateless   = false
+  
+    tcp_options {
+      max = 3000
+      min = 3000
+    }
+  }
 
   # Egresses
   egress_security_rules {
