@@ -80,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-monitoring
-          path: terraform/tfplan-monitoring
+          path: terraform-monitoring/tfplan-monitoring
 
 
   destroy-terraform-monitoring:
@@ -147,7 +147,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan-monitoring
-          path: terraform/tfplan-monitoring
+          path: terraform-monitoring
 
       - name: Terraform destroy
         env:
