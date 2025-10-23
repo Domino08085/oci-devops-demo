@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform
+        working-directory: terraform-monitoring
     steps:
       - uses: actions/checkout@v4
 
@@ -89,7 +89,7 @@ jobs:
     environment: dev
     defaults:
       run:
-        working-directory: terraform
+        working-directory: terraform-monitoring
     steps:
       - uses: actions/checkout@v4
 
@@ -146,8 +146,8 @@ jobs:
       - name: Download tfplan
         uses: actions/download-artifact@v4
         with:
-          name: tfplan
-          path: terraform
+          name: tfplan-monitoring
+          path: terraform/tfplan-monitoring
 
       - name: Terraform destroy
         env:
