@@ -174,7 +174,7 @@ jobs:
   plan-terraform:
     environment: dev
     runs-on: ubuntu-latest
-    needs: terraform-plan-monitoring
+    needs: destroy-terraform-monitoring
     defaults:
       run:
         working-directory: terraform
