@@ -15,6 +15,11 @@ env:
   OKE_KUBECONFIG_PATH: '/home/runner/.kube/config'
   OCIR_APP_REPO: demo-ocir-repo
   OKE_CLUSTER_ID: ${{ vars.OKE_CLUSTER_ID }}
+  APP_VERSION: v${{ github.run_number }}
+  GIT_SHA: ${{ github.sha }}
+  BUILD_TIME: ${{ github.event.head_commit.timestamp }}
+  ENV_NAME: dev
+  BUILD_NUMBER: ${{ github.run_number }}
 
 jobs:
   build_and_deploy:
@@ -106,11 +111,6 @@ jobs:
         with:
           version: 'v1.28.0'
 
-      # - name: Update Kubernetes Manifest (Image Tag)
-      #   run: |
-      #     FULL_IMAGE_URL="${{ env.OCI_REGISTRY }}/${{ env.OCIR_APP_REPO }}:${{ env.IMAGE_TAG }}"
-      #     sed -i "s|__IMAGE_TAG_PLACEHOLDER__|${{ env.IMAGE_TAG }}|g" k8s/manifest.yaml
-
       - name: Ensure namespace exists
         env:
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
@@ -134,5 +134,10 @@ jobs:
         env:
           IMAGE: ${{ steps.img.outputs.IMAGE }}
           K8S_NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
+          GIT_SHA: ${{ env.GIT_SHA }}
+          APP_VERSION: ${{ env.APP_VERSION }}
+          BUILD_TIME: ${{ env.BUILD_TIME }}
+          ENV_NAME: ${{ env.ENV_NAME }}
+          BUILD_NUMBER: ${{ env.BUILD_NUMBER }}
         run: |
           envsubst < k8s/manifest.yaml | kubectl apply -f -
