@@ -1,4 +1,5 @@
 import os, time, socket
+from functools import wraps
 from flask import Flask, Response, jsonify, render_template_string
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 
@@ -73,6 +74,7 @@ INDEX_HTML = """
 """
 
 def measure(func):
+    @wraps(func)  
     def wrapper(*args, **kwargs):
         start = time.perf_counter()
         resp = func(*args, **kwargs)
