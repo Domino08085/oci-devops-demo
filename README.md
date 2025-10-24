@@ -24,6 +24,7 @@ GitHub Actions → OCIR (Oracle Container Registry) → OKE (Oracle Kubernetes E
 
 ## 📁 Repository Structure
 
+<pre>
 oci-devops-demo/
 ├── app/                         # Python application code (Flask + Gunicorn)
 │   ├── main.py
@@ -69,6 +70,7 @@ oci-devops-demo/
 ├── .trivyignore
 ├── checkov.yml
 └── trivy.yaml
+</pre>
 
 ---
 
