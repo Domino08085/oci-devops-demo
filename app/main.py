@@ -51,7 +51,7 @@ INDEX_HTML = """
       <span class="badge">build #{{ build_number }}</span>
     </div>
     <h1 style="margin-top:10px">{{ message }}</h1>
-    <p>To jest „żywa” strona – po każdym deploymencie odśwież i zobaczysz zmienione metadane (wersja, SHA, czas builda, itp.).</p>
+    <p>Refresh to check changes (version, SHA, build time, itp.).</p>
 
     <div class="grid">
       <div class="kv"><div class="k">APP NAME</div><div class="v">{{ app_name }}</div></div>
