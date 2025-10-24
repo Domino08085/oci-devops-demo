@@ -1,4 +1,3 @@
-```
 # ☁️ OCI DevOps Demo
 
 An example project demonstrating an end-to-end DevOps pipeline in **Oracle Cloud Infrastructure (OCI)**:
@@ -195,4 +194,3 @@ Terraform secrets:
 ## 👨‍💻 Author
 
 Demo project created by **Domino08085**
-```
