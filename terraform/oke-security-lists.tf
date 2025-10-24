@@ -174,7 +174,7 @@ resource "oci_core_security_list" "oke_lb_security_list" {
   # EGRESS from LB to nodes (NodePort range)
   egress_security_rules {
     description      = "LB to worker NodePorts"
-    destination      = lookup(var.network_cidrs, "SUBNET-REGIONAL-CIDR") # subnet workerów
+    destination      = lookup(var.network_cidrs, "SUBNET-REGIONAL-CIDR")
     destination_type = "CIDR_BLOCK"
     protocol         = local.tcp_protocol_number
     stateless        = false
