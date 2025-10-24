@@ -68,6 +68,7 @@ oci-devops-demo/
 ├── .trivyignore
 ├── checkov.yml
 └── trivy.yaml
+└── schema_architecture.png
 </pre>
 
 ---
