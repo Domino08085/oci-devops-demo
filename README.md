@@ -59,7 +59,7 @@ oci-devops-demo/
 │   ├── bootstrap-tfstate.yml    # create Terraform backend
 │   ├── deploy-terraform.yml     # infrastructure provisioning
 │   ├── destroy-terraform.yml    # environment teardown
-│   └── security.yml             # security analysis (Trivy, Checkov)
+│   └── security.yml             # security analysis (Trivy, Checkov, AI)
 │
 ├── tools/                       # helper scripts
 │   └── analyze_security.py
