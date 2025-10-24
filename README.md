@@ -11,9 +11,7 @@ An example project demonstrating an end-to-end DevOps pipeline in **Oracle Cloud
 
 ## 🏗️ Architecture
 
-GitHub Actions → OCIR (Oracle Container Registry) → OKE (Oracle Kubernetes Engine)
-                                      ↓
-                         Monitoring: Prometheus + Grafana + Kubecost
+![Architecture Diagram](schema_architecture.png)
 
 - **OKE** – managed Kubernetes cluster in OCI  
 - **OCIR** – private container registry (Docker images)  
@@ -45,7 +43,7 @@ oci-devops-demo/
 │   ├── backend.tf
 │   └── data.tf
 │
-├── terraform-monitoring/        # Prometheus, Grafana, Kubecost (Helm)
+├── terraform-monitoring/        # Prometheus, Grafana (Helm)
 │   ├── monitoring.tf
 │   ├── backend.tf
 │   ├── provider.tf
@@ -116,7 +114,7 @@ python main.py
 - one Deployment + LoadBalancer Service in the namespace defined in `manifest.yaml`
 - uses a ConfigMap to set theme color and message
 
-### Monitoring (Prometheus + Grafana + Kubecost)
+### Monitoring (Prometheus + Grafana)
 Managed by Terraform (`terraform-monitoring/monitoring.tf`).
 
 - **Prometheus**: collects metrics from the application and cluster components  
@@ -129,7 +127,7 @@ Managed by Terraform (`terraform-monitoring/monitoring.tf`).
 ### Infrastructure stages
 1. **bootstrap/** – Terraform backend and OCI Object Storage bucket for state  
 2. **terraform/** – provisioning OKE, networking, policies, and keys  
-3. **terraform-monitoring/** – Prometheus, Grafana, and Kubecost via Helm  
+3. **terraform-monitoring/** – Prometheus and Grafana via Helm  
 
 Executed via the `deploy-terraform.yml` pipeline.
 
