@@ -12,7 +12,7 @@ resource "helm_release" "kube_prometheus_stack" {
   values = [<<-YAML
     grafana:
       adminPassword: "${var.adminPassword}"
-      replicas: 2
+      replicas: 1
       service:
         type: LoadBalancer
         port: 80
