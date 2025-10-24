@@ -9,15 +9,11 @@ resource "helm_release" "kube_prometheus_stack" {
   namespace  = kubernetes_namespace.monitoring.metadata[0].name
   version    = "58.7.2"
 
-  values = [<<-YAML
+values = [<<-YAML
     grafana:
       adminPassword: "${var.adminPassword}"
-      replicas: 1
       service:
         type: LoadBalancer
-        port: 80
-        targetPort: 3000
-        externalTrafficPolicy: Cluster
       defaultDashboardsEnabled: true
       persistence:
         enabled: false
@@ -28,11 +24,9 @@ resource "helm_release" "kube_prometheus_stack" {
       prometheusSpec:
         retention: 3d
         serviceMonitorNamespaceSelector: {}
-        serviceMonitorSelector: {}
-        serviceMonitorSelectorNilUsesHelmValues: false
-        podMonitorNamespaceSelector: {}
-        podMonitorSelector: {}
-        podMonitorSelectorNilUsesHelmValues: false
+        serviceMonitorSelector: {}         
+        podMonitorNamespaceSelector: {}     
+        podMonitorSelector: {}                
         ruleNamespaceSelector: {}
         ruleSelector: {}
         resources:
