@@ -24,9 +24,11 @@ resource "helm_release" "kube_prometheus_stack" {
       prometheusSpec:
         retention: 3d
         serviceMonitorNamespaceSelector: {}
-        serviceMonitorSelector: {}         
-        podMonitorNamespaceSelector: {}     
-        podMonitorSelector: {}                
+        serviceMonitorSelector: {}
+        serviceMonitorSelectorNilUsesHelmValues: false
+        podMonitorNamespaceSelector: {}
+        podMonitorSelector: {}
+        podMonitorSelectorNilUsesHelmValues: false
         ruleNamespaceSelector: {}
         ruleSelector: {}
         resources:

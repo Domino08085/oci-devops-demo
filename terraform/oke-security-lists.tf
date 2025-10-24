@@ -3,6 +3,10 @@ resource "oci_core_security_list" "oke_nodes_security_list" {
   display_name   = "oke-nodes-wkr-seclist-${random_string.deploy_id.result}"
   vcn_id         = oci_core_vcn.vcn.id
 
+  lifecycle {
+    ignore_changes = [ingress_security_rules, egress_security_rules]
+  }
+
   # Ingresses
   ingress_security_rules {
     description = "Allow pods on one worker node to communicate with pods on other worker nodes"
@@ -136,6 +140,10 @@ resource "oci_core_security_list" "oke_lb_security_list" {
   compartment_id = var.compartment_ocid
   display_name   = "oke-lb-seclist-${random_string.deploy_id.result}"
   vcn_id         = oci_core_vcn.vcn.id
+
+  lifecycle {
+    ignore_changes = [ingress_security_rules, egress_security_rules]
+  }
 
   # INGRESS from Internet to LB
   ingress_security_rules {
