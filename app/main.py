@@ -14,7 +14,7 @@ ENV_NAME = os.getenv("ENV_NAME", "dev")
 BUILD_NUMBER = os.getenv("BUILD_NUMBER", "0")
 
 # --- Config from ConfigMap/ENV ---
-THEME_COLOR = os.getenv("THEME_COLOR", "#0ea5e9")
+THEME_COLOR = os.getenv("THEME_COLOR", "#71daf5")
 MESSAGE = os.getenv("MESSAGE", "Hello from GitHub Actions → OCIR → OKE!")
 
 # --- Downward API ---
