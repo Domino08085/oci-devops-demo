@@ -17,7 +17,7 @@ env:
   OKE_CLUSTER_ID: ${{ vars.OKE_CLUSTER_ID }}
   APP_VERSION: v${{ github.run_number }}
   GIT_SHA: ${{ github.sha }}
-  BUILD_TIME: ${{ github.event.head_commit.timestamp }}
+  #BUILD_TIME: ${{ github.event.head_commit.timestamp }}
   ENV_NAME: dev
   BUILD_NUMBER: ${{ github.run_number }}
 
@@ -66,6 +66,10 @@ jobs:
           registry: ${{ env.OCI_REGISTRY }}
           username: ${{ secrets.OCIR_LOGIN }}
           password: ${{ secrets.OCI_AUTH_TOKEN }}
+
+      - name: Set BUILD_TIME
+        run: |
+          echo "BUILD_TIME=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_ENV
       
       # =======================================================
       # BUILD & PUSH (CI)
