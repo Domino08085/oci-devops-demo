@@ -189,9 +189,3 @@ GitHub Actions secrets stored in repository settings:
 
 Terraform secrets:
 - `var.adminPassword` – Grafana admin password  
-
----
-
-## 👨‍💻 Author
-
-Demo project created by **Domino08085**
