@@ -9,7 +9,7 @@ metadata:
   name: demo-python-config
   namespace: ${K8S_NAMESPACE}
 data:
-  THEME_COLOR: "#71daf5"
+  THEME_COLOR: "#43b726"
   MESSAGE: "Hello from OKE + CI/CD!"
 ---
 apiVersion: apps/v1
